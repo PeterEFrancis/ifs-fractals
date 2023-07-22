@@ -8,3 +8,4 @@ google-auth-oauthlib==0.8.0
 gspread==5.7.2
 oauth2client==4.1.3
 google-api-python-client==2.91.0
+ifsFractals

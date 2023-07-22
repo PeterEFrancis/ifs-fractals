@@ -8,13 +8,10 @@ import time
 import hashlib
 
 
-
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import googleapiclient.discovery
 from googleapiclient.http import MediaFileUpload
-
-
 
 
 
@@ -43,10 +40,12 @@ app.config['SECRET_KEY'] = 'secret!'
 # Connect to Google Sheets
 scope = [
     'https://www.googleapis.com/auth/spreadsheets',
-     "https://www.googleapis.com/auth/drive"
+    "https://www.googleapis.com/auth/drive"
 ]
 
-credentials = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+cred_loc = '' if os.getcwd()[1:].split("/")[0] == 'Users' else '/etc/secrets/'
+
+credentials = ServiceAccountCredentials.from_json_keyfile_name(cred_loc + "credentials.json", scope)
 client = gspread.authorize(credentials)
 service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials)
 
@@ -305,6 +304,15 @@ def python_docs():
         'python.html', 
         navbar=get_navbar('python')
     )
+
+
+@app.route('/forum')
+def forum():
+    return render_template(
+        'forum.html', 
+        navbar=get_navbar('forum')
+    )
+
 
 
 

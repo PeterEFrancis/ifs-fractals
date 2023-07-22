@@ -49,34 +49,62 @@
         user-select: none;
       }
 
+      h3 {
+        margin-top: 50px;
+      }
+
+      p {
+        margin-bottom: 0px;
+      }
+
+      ul {
+        margin-bottom: 10px;
+      }
+
     </style>
   </head>
   <body>
 
   {{navbar|safe}}
 
-  <div class="container">
-    <div class="row" style="margin-bottom: 10px;">
-      <div class="col-sm-8">
-        <h1>Python Docs</h1>
-        <h4>Contents</h4>
-        <ul>
-          <li><a href="#installation">Installation</a></li>
-          <li><a href="#examples">Examples</a></li>
-          <li><a href="#usage">Usage</a></li>
-        </ul>
-        
-        <h3 id="installation">Install <strong>ifsFractals</strong> from <a href="https://pypi.org/project/ifsFractals/" target="_blank">PyPi</a></h3>
-          <pre>pip install ifsFractals</pre>
+    <div class="container">
+      <div class="row" style="margin-bottom: 10px;">
+        <div class="col-md-12">
+
+          <h1>Python Docs</h1>
+          <h4 style="margin-top: 30px;">Contents</h4>
+          <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#usage">Usage Classes and Methods</a>
+              <ul>
+                <li><a href="#built-in-transformations">Built-In Transormations</a></li>
+                <li><a href="#built-in-figures">Built-In Figures</a></li>
+                <li><a href="#figure-iteration">Figure Iteration</a></li>
+                <li><a href="#point-generation">Point Generation and Bounds</a></li>
+                <li><a href="#fractal-class">The Fractal Class</a></li>
+              </ul>
+            </li>
+          </ul>
+          
+          <h3 id="overview">Overview</h3>
+          <p>
+            The ifsFractals Python Module has similar functionality as this site. It can be useful to create larger versions of fractals, or perhaps automate the generation of several fractals at once. The ifsFractal module can also export to this website's playground.
+          </p>
+
+          <h3 id="installation">Install <a href="https://github.com/PeterEFrancis/ifsFractals-py" target="_blank">ifsFractals</a> from <a href="https://pypi.org/project/ifsFractals/" target="_blank">PyPi</a></h3>
+            <pre>pip install ifsFractals</pre>
+
           <h3>Quickstart Example</h3>
 <pre>
 # import ifsFractals module
 import ifsFractals as ifs
 
 # define transformations
-T_1 = Scale(1/2)
-T_2 = Translate(1/2, 0) @ Scale(1/2)
-T_3 = Translate(1/4, 1/2) @ Scale(1/2)
+T_1 = ifs.Scale(1/2)
+T_2 = ifs.Translate(1/2, 0) @ ifs.Scale(1/2)
+T_3 = ifs.Translate(1/4, 1/2) @ ifs.Scale(1/2)
 T = [T_1, T_2, T_3]
 
 # create fractal object
@@ -86,12 +114,243 @@ fractal = ifs.Fractal(T)
 fractal.add_points(100_000)
 fractal.display()
 </pre>
+
+          <h3 id="usage">Usage Classes and Methods</h3>
+          
+          <h4 id="built-in-transformations">Built-In Transformations</h4>
+          <p>The module offers several built-in transformations, which are represented as 3x3 matrices. These transformations can be combined to create a sequence of transformations for fractal generation. The available transformations are:</p>
+
+          <ul>
+            <li><code>Scale(s: float)</code>: Uniform scaling by a factor <code>s</code> in both x and y directions.</li>
+            <li><code>Translate(a: float, b: float)</code>: Translation by <code>a</code> units along the x-axis and <code>b</code> units along the y-axis.</li>
+            <li><code>Rotate(theta: float)</code>: Rotation around the origin by an angle <code>theta</code> (in radians).</li>
+            <li><code>ShearX(t: float)</code>: Shearing of points along the x-axis by a factor <code>t</code>.</li>
+            <li><code>ShearY(t: float)</code>: Shearing of points along the y-axis by a factor <code>t</code>.</li>
+            <li><code>ScaleX(s: float)</code>: Scaling along the x-axis by a factor <code>s</code>.</li>
+            <li><code>ScaleY(s: float)</code>: Scaling along the y-axis by a factor <code>s</code>.</li>
+            <li><code>ScaleXY(s: float, t: float)</code>: Scaling by different factors <code>s</code> and <code>t</code> in the x and y directions, respectively.</li>
+          </ul>
+
+          <h4 id="built-in-figures">Built-In Figures</h4>
+          <p>
+            The module provides several built-in figures, represented as arrays of points. These figures can be used in fractal generation. The available figures are:
+          </p>
+          <ul>
+            <li><code>Box()</code>: A square figure represented as an array of points.</li>
+            <li><code>rect(n: int)</code>: Function to generate a rectangular figure by scaling the <code>Box</code> figure along the y-axis by a factor <code>1/n</code>.</li>
+            <li><code>Line()</code>: A line segment represented as an array of points.</li>
+            <li><code>XBox()</code>: A Box with an X shape, represented as an array of points.</li>
+          </ul>
+
+
+          <h4 id="figure-iteration">Figure Iteration</h4>
+          <ul>
+            <li><code>transform(figures: List[np.ndarray], transformations: List[np.ndarray]) -> List[np.ndarray]</code>
+            <p>
+              Transforms a list of figures using a list of transformations.
+            </p>
+            <ul>
+                <li><code>figures</code>: (List[np.ndarray]) List of numpy arrays representing the initial figures.</li>
+                <li><code>transformations</code>: (List[np.ndarray]) List of numpy arrays representing the transformations to apply to the figures.</li>
+            </ul>
+            <p>Returns: (List[np.ndarray]) List of numpy arrays representing the transformed figures.</p>
+            </li>
+
+            <li>
+              <code>generate_figures(n: int, figures: List[np.ndarray], transformations: List[np.ndarray]) -> List[np.ndarray]</code>
+              <p>Generates a list of figures by iteratively applying transformations to the initial figures.</p>
+              <ul>
+                <li><code>n</code>: (int) Number of iterations to apply transformations.</li>
+                <li><code>figures</code>: (List[np.ndarray]) List of numpy arrays representing the initial figures.</li>
+                <li><code>transformations</code>: (List[np.ndarray]) List of numpy arrays representing the transformations to apply to the figures.</li>
+              </ul>
+              <p>Returns: (List[np.ndarray]) List of numpy arrays representing the generated figures.</p>
+            </li>
+
+            <li>
+              <code>plot_figures(figures: List[np.ndarray], size: int=4, width: float=1.5, color: str='blue')</code>
+              <p>Plots the given list of figures using matplotlib.</p>
+              <ul>
+               <li><code>figures</code>: (List[np.ndarray]) List of numpy arrays representing the figures to plot.</li>
+                <li><code>size</code>: (Optional int)Size of the plot (default: 4).</li>
+                <li><code>width</code>: (Optional float)Width of the lines in the plot (default: 1.5).</li>
+                <li><code>color</code>: (Optional str) Color of the lines in the plot (default: 'blue').</li>
+              </ul>
+              <p>Note: This function plots the figures using matplotlib and does not return anything.</p>
+            </li>
+          </ul>
+
+
+
+
+          <h4 id="point-generation">Point Generation and Bounds</h4>
+          <p>
+            The module provides functions to generate sets of points and calculate bounds for fractals.
+          </p>
+          <ul>
+            <li>
+              <code>generate_points(n: int, transformations: List[np.ndarray], weights: Optional[List[float]], head_start: int)</code>
+              <p>
+                Function to generate a set of points by applying random transformations to an initial point.
+              </p>
+              <ul>
+                <li><code>n</code>: (int) Number of points to generate.</li>
+                <li><code>transformations</code>: (List[np.ndarray]) List of transformations represented as matrices.</li>
+                <li><code>weights</code>: (Optional[List[float]]) List of weights for each transformation.</li>
+                <li><code>head_start</code>: (int) Number of initial iterations to skip before generating points.</li>
+              </ul>
+            </li>
+            <li>
+              <code>plot_points(points: List[np.ndarray], size: Optional int)</code>
+              <p>
+                Function to plot a set of points.
+              </p>
+              <ul>
+                <li><code>points</code>: (List[np.ndarray]) List of points to plot.</li>
+                <li><code>size</code>: (Optinal int) size of plot.</li>
+              </ul>
+            </li>
+            <li>
+              <code>find_bounds(transformations: List[np.ndarray], weights: Optional[List[float]])</code>
+              <p>
+                Function to find the bounds (min and max values) of the generated points based on transformations and weights.
+              </p>
+              <ul>
+                <li><code>transformations</code>: (List[np.ndarray]) List of transformations represented as matrices.</li>
+                <li><code>weights</code>: (Optional[List[float]]) List of weights for each transformation.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h4 id="fractal-class">Fractal Class</h4>
+          <p>The <code>Fractal</code> class represents an IFS fractal and provides methods for creating, plotting, and saving the fractal.</p>
+          <ul>
+            <li>
+              <code>__init__(self, transformations: List[np.ndarray], weights: Optional[List[float]], size: int, color: Tuple[int, int, int])</code>
+              <p>
+                Class constructor to initialize the Fractal object.
+              </p>
+              <ul>
+                <li><code>transformations</code>: (List[np.ndarray]) List of transformations represented as matrices.</li>
+                <li><code>weights</code>: (Optional[List[float]]) List of weights for each transformation.</li>
+                <li><code>size</code>: (int) Size of the fractal.</li>
+                <li><code>color</code>: (Tuple[int, int, int]) RGB color tuple for the fractal.</li>
+              </ul>
+            </li>
+            <li>
+              <code>set_weights(self, weights: Optional[List[float]])</code>
+              <p>
+                Method to set the weights for each transformation.
+              </p>
+              <ul>
+                <li><code>weights</code>: (Optional[List[float]]) List of weights for each transformation.</li>
+              </ul>
+            </li>
+            <li>
+              <code>plot_figures(self, depth: int, initial: np.ndarray, size: int, width: float, color: str)</code>
+              <p>
+                Method to plot the figures generated by applying transformations to an initial figure.
+              </p>
+              <ul>
+                <li><code>depth</code>: (int) Number of iterations to apply transformations.</li>
+                <li><code>initial</code>: (np.ndarray) Initial figure as an array of points.</li>
+                <li><code>size</code>: (int) Size of the plot.</li>
+                <li><code>width</code>: (float) Width of the lines in the plot.</li>
+                <li><code>color</code>: (str) Color of the lines in the plot.</li>
+              </ul>
+            </li>
+            <li>
+              <code>check_transformations(self, verbose: bool) -> bool</code>
+              <p>
+                Method to check if the transformations are valid contraction mappings.
+              </p>
+              <ul>
+                <li><code>verbose</code>: (bool) If True, prints the result of the check.</li>
+              </ul>
+              <p>Returns: (bool) True if all transformations are valid contraction mappings, False otherwise.</p>
+            </li>
+            <li>
+              <code>iterate(self)</code>
+              <p>
+                Method to perform a single iteration of random transformation on the fractal point.
+              </p>
+            </li>
+            <li>
+              <code>add_points(self, n: int)</code>
+              <p>Method to add <code>n</code> points to the fractal by iterating random transformations on the fractal point.</p>
+              <ul>
+                <li><code>n</code>: (int) Number of points to add.</li>
+              </ul>
+            </li>
+            <li>
+              <code>load_in_points(self, externalTup: Tuple[np.ndarray, np.ndarray])</code>
+              <p>
+                Method to load a set of points into the fractal object for visualization.
+              </p>
+              <ul>
+                <li><code>externalTup</code>: (Tuple[np.ndarray, np.ndarray]) Tuple of two arrays representing x and y coordinates of external points to be loaded.</li>
+              </ul>
+            </li>
+            <li>
+              <code>save(self, path: str)</code>
+              <p>
+                Method to save the plotted fractal as an image file.
+              </p>
+              <ul>
+                <li><code>path</code>: (str) Path to save the image file.</li>
+              </ul>
+            </li>
+            <li>
+              <code>display(self)</code>
+              <p>
+                Method to display the plotted fractal as an image.
+              </p>
+            </li>
+            <li>
+              <code>export(self)</code>
+              <p>
+                Method to export the fractal as a JSON object, including the transformations and weights used.
+              </p>
+            </li>
+            <li>
+              <code>link(self)</code>
+              <p>
+                Method to generate a link to the IFS Fractals web application with the current fractal configuration.
+              </p>
+            </li>
+            <li>
+              <code>link_web(self)</code>
+              <p>
+                Method to display a clickable link to the IFS Fractals web application with the current fractal configuration.
+              </p>
+            </li>
+            <li>
+              <code>embed_web(self)</code>
+              <p>
+                Method to display the IFS Fractals web application with the current fractal configuration embedded as an IFrame.
+              </p>
+            </li>
+          </ul>
+
+
+        </div>
       </div>
     </div>
-  </div>
 
   </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
