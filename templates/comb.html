@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$','$'], ['\\(','\\)']]
+        }
+      });
+    </script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+    <style>
+      br {
+        user-select: none;
+      }
+      .disabled {
+        color: lightgrey;
+      }
+    </style>
+  </head>
+  <body style="margin: 30px auto 100px auto; max-width: 600px;">
+    <div hidden>
+    \(
+      \newcommand{\R}{\mathbb{R}}
+      \newcommand{\N}{\mathbb{N}}
+      \newcommand{\Translate}{\operatorname{Translate}}
+      \newcommand{\Rotate}{\operatorname{Rotate}}
+      \newcommand{\Scale}{\operatorname{Scale}}
+      \newcommand{\XYScale}{\operatorname{XYScale}}
+      \newcommand{\YScale}{\operatorname{YScale}}
+      \newcommand{\XShear}{\operatorname{XShear}}
+      \newcommand{\YShear}{\operatorname{YShear}}
+      \newcommand{\m}[4]{\begin{pmatrix}#1 & #2 \\ #3 & #4\end{pmatrix}}
+      \newcommand{\K}{\mathcal{K}}
+      \newcommand{\C}{\mathcal{C}}
+      \newcommand{\T}{\mathcal{T}}
+      \newcommand{\e}{\varepsilon}
+      \newcommand{\diam}{\operatorname{diam}}
+      \newcommand{\Trace}{\operatorname{Trace}}
+      \renewcommand{\mid}{\ : \ }
+    \)
+    </div>
+    <h1>Combinatorics Question</h1>
+    <p>Let $k\geq 2$ and suppose $P=(p_1,\dots, p_k)$ is some discrete probability distribution, meaning $p_i\in(0,1)$ and $\sum P =1$.</p>
+    <p>Define a random sequence $(r_i)$ with $r_i\in[0,1]$ chosen uniformly for each $i\in\N$.</p>
+    <p>Define the sequence $$(t_n)=\left(m\mid \sum_{i=1}^{m-1}p_i < r_n < \sum_{i=1}^m p_i\right).$$</p>
+    In other words, $(t_n)$ is a sequence created by randomly choosing successive elements from $\{1,\dots,k\}$: choose the number $i\in\{1,\dots,k\}$ with probability $p_i$.
+    <blockquote>
+      <strong>Question:</strong> What is the probability $H(P,d,l)$ that every $d$-length sequence in $\{1,\dots,k\}$ appears as a continuous subsequence of the first $l$ terms of $(t_n)$?
+    </blockquote>
+    <blockquote>
+      <strong>Problem:</strong> Find the number $T(k,d,l)$ of $l$-length sequences in $\{1,\dots,k\}$ that contain as continous subsequences, all $d$-length sequences in $\{1,\dots,k\}$.
+    </blockquote>
+    <p>Since the number of $l$-length sequences in $\{1,\dots,k\}$ is $k^l$, when $P=\left(\frac{1}{k},\dots,\frac{1}{k}\right)$, $$H(P,d,l)=\frac{T(k,d,l)}{k^l}.$$</p>
+    <h3>Some values:</h3>
+    <ol>
+      <li>
+        Clearly, since $k\geq 2$, the number of $d$-length sequences in $\{1,\dots,k\}$ is at least $2 > 1$. So, if $l\leq d$, then any $l$-length sequence can contain at most 1 $d$-length subsequence, which implies that $T(k,d,l)=0$.
+      </li>
+      <li>
+        For $k\geq 2$, the shortest superpermutation (see <a href="https://en.wikipedia.org/wiki/Superpermutation#Lower_bounds,_or_the_Haruhi_problem" target="_blank">here</a>) of $\{1,\dots,k\}$ has length at least $$z(k)=k!+(k-1)!+(k-2)!+(k-3),$$ $H(P,k,l)=T(k,k,l)=0$ if $l < z(k)$.<!-- and $2 \leq k\leq d$.-->
+      </li>
+      <li class="disabled">
+        The only 2-length sequences in $\{1,2\}$ that contain both 1 and 2 are $(1,2)$ and $(2,1)$. The probability that a sequence in $\{1,2\}$ is one of these two is $$H((\alpha, 1-\alpha), 1, 2)=\alpha(1-\alpha) + (1-\alpha)\alpha = 2\alpha(1-\alpha).$$
+      </li>
+      <li class="disabled">
+        For all $l\in\N$ with $l \geq 3$, $$H((\alpha, 1-\alpha), 1,l)=\alpha(1-\alpha)\left(3+\sum_{i=2}^{l - 2}\alpha^i+(1-\alpha)^i\right).$$
+        PROOF. Induct on $l\geq 3$, and notice that
+        $$H((\alpha, 1-\alpha), 1, l) = H((\alpha, 1-\alpha), 1, l) + \alpha^l(1-\alpha) + (1-\alpha)^l\alpha$$
+        since an $(l+1)$-length sequence that contains both $1$ and $2$ does so in the first $l$ terms, is $(1,\dots,1,2)$, or is $(2,\dots, 2,1)$.
+      </li>
+      <li>
+        When $l < k$, it is not possible that all elements of $\{1,\dots,k\}$ appear in an $l$-length sequence of $\{1,\dots,k\}$, so for any $P$, $H(P,1,l)=0$.
+      </li>
+      <li>
+        (Gen. 3) (Case where $l=k$). For any $P$,
+        $$H(P,1,k)=k!\prod P.$$
+        PROOF. There are $k!$ ways to order the elements of $\{1,\dots,k\}$; there are $k!$ $k$-length sequences that contain all elements of $\{1,\dots,k\}$. Each sequence has probability of $\prod P$ of occuring.
+      </li>
+      <li>
+        (Gen. 4) (Case where $l>k$). For any $P$,
+        $$H(P,1,l)=H(P,1,l-1)+\sum_{i=1}^{l-1}H(P\setminus(p_i),1,l-1)\cdot p_i.$$
+        PROOF. When $l>k$, an $l$-length sequence that contains every element of $\{1,\dots,k\}$ does so in the first $l-1$ terms (with probability $H(P,1,l-1)$), or requires the last term. In the second case, for any $i\in\{1,\dots,k\}$, the sequence is missing only $i$ from the first $l-1$ terms with probability $H(P\setminus(p_i), 1, l-1)$, and contains $i$ as the last term with probability $p_i$.
+      </li>
+    </ol>
+    <hr>
+    <h2 id="estimation">Estimate $H(P,d,l)$</h2>
+    <label>$P = ($<input id="H-P" value="1,1" onchange="document.getElementById('H-k').value=this.value.split(',').length;"></input>$)$</label>
+    <br><br>
+    <label>$k =$ <input id="H-k" type="number" value="2" readonly disabled></input></label>
+    <br><br>
+    <label>$d =$ <input id="H-d" type="number" value="1"></input></label>
+    <br><br>
+    <label>$l =$ <input id="H-l" type="number" value="3"></input></label>
+    <p style="color: red; font-family:monospace" id="warning">&nbsp;</p>
+    <br>
+    <label>Trials: <input id="trials" type="number" value="10000"></input></label>
+    <button type="button" onclick="calculate_H();">Calculate</button>
+    <br><br>
+    <textarea id="H-output" rows="10" style="width: 100%; resize:none;" readonly resizable="false"></textarea>
+    <br><br><br>
+    <hr>
+    <h2 id="estimation">Calculate $T(k,d,l)$</h2>
+    <label>$k =$ <input id="T-k" type="number" value="2"></input></label>
+    <br><br>
+    <label>$d =$ <input id="T-d" type="number" value="1"></input></label>
+    <br><br>
+    <label>$l =$ <input id="T-l" type="number" value="3"></input></label>
+    <br><br>
+    <button type="button" onclick="calculate_T();">Calculate</button>
+    <br><br>
+    <textarea id="T-output" rows="10" style="width: 100%; resize:none;" readonly resizable="false"></textarea>
+
+    <script>
+
+    function factorial(n) {
+      if (n < 0) {
+        return 0;
+      }
+      var f = 1;
+      for (var i = 1; i < n + 1; i++) {
+        f = f * i;
+      }
+      return f;
+    }
+
+    function z(k) {
+      return factorial(k) + factorial(k - 1) + factorial(k - 2) + k - 3;
+    }
+
+    function all_sequences(length, range) {
+      // get a list of all (length)-length sequences in {1, ..., range}
+      var all = [];
+      var num = [];
+      for (var i = 0; i < length; i++) {
+        num.push(1);
+      }
+      for (var i = 0; i < Math.pow(range,length); i++) {
+        for (var j = 0; j < length - 1; j++) {
+          if (num[j] == range + 1) {
+            num[j] = 1;
+            num[j + 1] += 1;
+          }
+        }
+        all.push("(" + num.join("),(") + ")");
+        num[0] += 1;
+      }
+      return all;
+    }
+
+    function random_sequence(dist, length) {
+      var running = [dist[0]];
+      for (var i = 1; i < dist.length; i++) {
+        running.push(running[i - 1] + dist[i]);
+      }
+      var s = [];
+      for (var i = 0; i < length; i++) {
+        const r = Math.random();
+        for (var j = 0; j < running.length; j++) {
+          if (r < running[j]) {
+            s.push(j + 1);
+            break;
+          }
+        }
+      }
+      return "(" + s.join("),(") + ")";
+    }
+
+    function calculate_H() {
+
+      const P_1 = document.getElementById('H-P').value.trim().split(',');
+      var P_2 = [];
+      for (var i = 0; i < P_1.length; i++) {
+        P_2.push(Number(P_1[i].trim()));
+      }
+      const sum = P_2.reduce((a, b) => a + b, 0);
+      var P = [];
+      for (var i = 0; i < P_2.length; i++) {
+        P.push(P_2[i] / sum);
+      }
+
+      const k = P.length;
+      const d = Number(document.getElementById('H-d').value);
+      const l = Number(document.getElementById('H-l').value);
+      const trials = Number(document.getElementById('trials').value);
+
+      var count = 0;
+
+      const d_seqs = all_sequences(d, k);
+      const a = d_seqs.length;
+
+      var add = 1;
+
+      for (var i = 0; i < trials; i++) {
+        // generate a random l-length sequence in {1, ..., P.length = k} using P
+        // check that every d-length sequence is a sub sequence
+        add = 1;
+        const l_seq = random_sequence(P, l);
+        for (var j = 0; j < a; j++) {
+          if (!l_seq.includes(d_seqs[j])) {
+            add = 0;
+            break;
+          }
+        }
+        count += add;
+      }
+
+      document.getElementById('H-output').innerHTML += 'H([' + P + '],' + d + ',' + l + ') ≈ ' + count + "/" + trials + " = " + (count / trials) + '\n';
+    }
+
+    function calculate_T() {
+
+      const k = Number(document.getElementById('T-k').value);
+      const d = Number(document.getElementById('T-d').value);
+      const l = Number(document.getElementById('T-l').value);
+
+      var count = 0;
+
+      const l_seqs = all_sequences(l, k);
+      const d_seqs = all_sequences(d, k);
+      var add = 1;
+      for (var i = 0; i < l_seqs.length; i++) {
+        add = 1;
+        for (var j = 0; j < d_seqs.length; j++) {
+          if (!l_seqs[i].includes(d_seqs[j])) {
+            add = 0;
+            break;
+          }
+        }
+        count += add;
+      }
+
+      document.getElementById('T-output').innerHTML += 'T(' + k + ',' + d + ',' + l + ') = ' + count + '\n';
+    }
+
+
+    </script>
+
+  </body>
+</html>

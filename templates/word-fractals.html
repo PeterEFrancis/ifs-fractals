@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>IFS Fractals : Word Fractals</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="shortcut icon" href="static/img/leaf.gif" type="image/gif">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- MathJax -->
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+  <!-- Guppy -->
+  <link rel="stylesheet" href="/static/guppy/guppy-default.min.css">
+  <script type="text/javascript" src="/static/guppy/guppy.min.js"></script>
+
+  <!-- Class styles -->
+  <link rel="stylesheet" href="/static/css/Cartesian.css">
+
+  <!-- MathJs -->
+  <script src="/static/js/math.js"></script>
+
+
+  <style>
+
+    body {
+      min-width: 250px;
+    }
+
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    canvas {
+      width: 100%;
+      border: 1px solid black;
+    }
+
+    br {
+      user-select: none;
+    }
+
+  </style>
+</head>
+<body>
+
+{{navbar|safe}}
+
+<div class="container">
+  <div class="row" style="margin-bottom: 30px;">
+    <div class="col-md-12">
+      <h1>Word Fractals</h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6" style="padding-bottom: 15px;">
+      <h3>Word</h3>
+      <input id="word-input" type="text" class="form-control" value="{{word}}" onchange="update();"></input>
+      <br>
+      <input id="color" type="color" style="width: 100%; height: 3em;" oninput="cart.set_color(this.value); fractal.plot();"></input>
+      <br>
+      <br>
+      <div class="input-group">
+        <span class="input-group-addon">Max Number of Points to Plot</span>
+        <input type="text" class="form-control" onchange="fractal.set_max_number_of_points(this.value); fractal.plot();" value="10000"/>
+      </div>
+      <br>
+      <div class="input-group">
+        <span class="input-group-addon">Zoom</span>
+        <input type="text" class="form-control" onchange="cart.zoom_to(this.value); fractal.plot();" id="zoom" value="50"/>
+      </div>
+      <br>
+      <button class="btn btn-default btn-lg btn-block" onclick="cart.set_with_bounds(fractal.get_bounds(), 0.9);fractal.plot();">Auto Center</button>
+    </div>
+    <div class="col-md-6">
+      <canvas id="fractal"></canvas>
+      <p class="text-center" id="hover-loc">&nbsp;</p>
+      <p id="fractal-error" style="color: red">&nbsp;</p>
+
+      <button class="btn btn-lg btn-default center-block" onclick="cart.download()"><span class="glyphicon glyphicon-download-alt"></span> Download Image</button>
+      <br>
+      <!-- <div class="input-group">
+        <span class="input-group-btn">
+          <button class="btn btn-default" onclick="document.getElementById('box-dimension').value = fractal.calculate_box_dimension();">Calculate Box Dimension</button>
+        </span>
+        <input id="box-dimension" class="form-control" readonly/>
+      </div>
+      <br>
+      <div class="input-group">
+        <span class="input-group-btn">
+          <button class="btn btn-default" onclick="document.getElementById('analytic-dimension').value = fractal.calculate_analytic_dimension(5);">Calculate Analytic Dimension</button>
+        </span>
+        <input id="analytic-dimension" class="form-control" readonly/>
+      </div> -->
+
+
+    </div>
+  </div>
+  <br><br><bR><br><br>
+
+</div>
+
+<!-- classes -->
+<script src="/static/js/Cartesian.js"></script>
+<script src="/static/js/Fractal.js"></script>
+
+<!-- auxilliary -->
+<script src="/static/js/transformations.js"></script>
+<script src="/static/js/factor_transformation.js"></script>
+<script src="/static/js/letter_transformations.js"></script>
+<script src="/static/js/helper.js"></script>
+
+
+
+<script>
+
+    var canvas = document.getElementById('fractal');
+    canvas.width = 1000;
+    canvas.height = 1000;
+    var cart = new Cartesian(canvas);
+    cart.on_zoom_change = function () {
+      document.getElementById('zoom').value = cart.zoom;
+    };
+    cart.on_mouse_over = function() {
+      var depth = Math.pow(10, Math.round(Math.log(cart.zoom) / Math.log(10)) - 1);
+      document.getElementById('hover-loc').innerHTML = "(" + (Math.round(cart.hover.x * depth) / depth)  + "," + (Math.round(cart.hover.y * depth) / depth) + ")";
+    };
+    cart.on_mouse_out = function() {
+      document.getElementById('hover-loc').innerHTML = "&nbsp;";
+    }
+
+    var fractal = new Fractal(cart, get_word_tw("Fractal"));
+
+    // create fractal error catch
+    function report_error(msg) {
+      document.getElementById('fractal-error').innerHTML = '<span class="glyphicon glyphicon-warning-sign"></span> ' + msg;
+      console.log(msg);
+    }
+    function clear_error() {
+      document.getElementById('fractal-error').innerHTML = '&nbsp';
+    }
+
+
+    function update() {
+      try {
+        // set fractal with new transformations
+        const tw = get_word_tw(document.getElementById('word-input').value);
+        fractal.set_TW(tw);
+        cart.set_with_bounds(fractal.get_bounds(), 0.9);
+        fractal.plot();
+        clear_error();
+      } catch (e) {
+        report_error(e);
+      }
+    }
+
+    update();
+
+
+</script>
+
+</body>
+</html>

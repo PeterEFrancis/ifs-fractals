@@ -1,0 +1,6 @@
+#cursorText {
+  position: absolute;
+  background-color: white;
+  padding: 2px;
+  pointer-events: none;
+}

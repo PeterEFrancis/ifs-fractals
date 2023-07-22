@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>IFS Fractals</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="static/img/leaf.gif" type="image/gif">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- MathJax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+    <!-- HTMLTeX -->
+    <script src="https://PeterEFrancis.com/HTMLTeX/HTMLTeX.js"></script>
+    <link rel="stylesheet" href="https://PeterEFrancis.com/HTMLTeX/HTMLTeX.css">
+
+    <style>
+
+      body {
+        min-width: 250px;
+      }
+
+      .navbar {
+        margin-bottom: 0;
+        border-radius: 0;
+      }
+
+      br {
+        user-select: none;
+      }
+
+      div {
+        overflow: scroll;
+      }
+
+    </style>
+
+  </head>
+  <body>
+
+{{navbar|safe}}
+
+  <div class="container" style="margin-bottom: 100px;">
+    <div class="row">
+      <div class="col-md-12" id="LaTeX" spellcheck="true" contenteditable="false">
+        <div hidden>
+        \(
+          \newcommand{\R}{\mathbb{R}}
+          \newcommand{\N}{\mathbb{N}}
+          \newcommand{\Translate}{\operatorname{Translate}}
+          \newcommand{\Rotate}{\operatorname{Rotate}}
+          \newcommand{\Scale}{\operatorname{Scale}}
+          \newcommand{\XYScale}{\operatorname{XYScale}}
+          \newcommand{\YScale}{\operatorname{YScale}}
+          \newcommand{\XShear}{\operatorname{XShear}}
+          \newcommand{\YShear}{\operatorname{YShear}}
+          \newcommand{\m}[4]{\begin{pmatrix}#1 & #2 \\ #3 & #4\end{pmatrix}}
+          \newcommand{\K}{\mathcal{K}}
+          \newcommand{\C}{\mathcal{C}}
+          \newcommand{\T}{\mathcal{T}}
+          \newcommand{\e}{\varepsilon}
+          \newcommand{\diam}{\operatorname{diam}}
+          \newcommand{\Trace}{\operatorname{Trace}}
+          \renewcommand{\mid}{\ : \ }
+          \newcommand{\dim}{\operatorname{dim}}
+          \newcommand{\Ord}{\operatorname{Ord}}
+          \newcommand{\Ref}{\operatorname{Ref}}
+          \newcommand{\O}{\mathcal{O}}
+
+        \)
+        </div>
+
+
+        <h1>IFS Fractals</h1>
+        <em>Peter E. Francis</em>
+        <hr>
+        <tableofcontents></tableofcontents>
+        <hr>
+
+
+
+        <section id="intro">Introduction</section>
+        <!-- The word <strong>fractal</strong> has gotten much abuse: its definition is often misquoted or changed, and although many people seem to have an intuitive understanding of basic "fractal-like" shapes, many people do not know that fractals do not have to be self-similar.  -->
+        Although the word <strong>fractal</strong> can have various meanings in different contexts, the fractals that we are concerned with are fixed points of linear contraction mappings on compact subsets of the plane, and are decidedly self-similar. Mandelbrot gave a more general definition in 1975:
+        <definition id="fractal">
+          A <em>fractal</em> is a subset of the plane $\R^2$ whose Hausdorff–Besicovitch dimension is strictly greater than its topological dimension.
+        </definition>
+        <br><br>
+        Here, motivated by the desire to randomly generate fractals from the full sample space of possible transformations, we fully classify the affine linear transformations that can determine them with a particular functional decomposition. We will also discuss the ways that fractal images are generated on this site.
+
+
+        <!-- We will use the following definition (given by Benoit Mandelbrot in 1975):
+        <definition id="fractal">
+          A <em>fractal</em> is a subset of the plane $\R^2$ whose Hausdorff–Besicovitch dimension is strictly greater than its topological dimension.
+        </definition>
+        The idea of fractal dimension will be explored below. -->
+
+        <section>Existence of an IFS Fractal</section>
+        In order to understand the type of fractal we are interested in, we must first build up to an existence theorem.</p>
+        Let $X$ be a metric space with metric $d.$
+        <definition id="contraction-mapping">
+          A function $f: X\to X$ is a <em>contraction mapping</em> if there is some $c\in(0,1)$ such that for all $x_1,x_2\in X$, $$d(f(x_1)-f(x_2))\leq cd(x_1-x_2).$$ The number $c$ is called the <em>contraction constant</em> of $f.$
+        </definition>
+        The following theorem is a common result in an introductory analysis course. Its proof is presented in <cite to="BBK"></cite>
+        <theorem id="contraction-mapping-principle" title="The contraction mapping principle">
+          Suppose that $X$ is a complete metric space with metric $d$ and that $f:X\to X$ is a contraction mapping. Then
+          <ul>
+            <li>$f$ has a unique fixed point: there is a single $p\in X$ such that $f(p)=p$;</li>
+            <li>Given any $q\in X$, the sequence $(x_n)$ defined by $x_0=q$ and $x_{n+1}=f(x_n)$ for $n>0$ converges to $p.$</li>
+          </ul>
+        </theorem>
+        In order to use apply this principle to iterated function systems, we have to discuss the metric space $\K$, the set of nonempty compact subsets of $\R^2.$ The metric on this space is called the Hausdorff Metric, which first requires the following definition.
+        <definition id="r-collar">
+          Given $U\subseteq \R^2$ and $r>0$, we define the <em>$r$-collar</em> of $U$ to be the set $$U_r=\{x\in\R^2\mid |x-u|\leq r\text{ for some $u\in U$}\}.$$
+        </definition>
+        Intuitively, the name "collar" should invoke a sense that $U_r$ is the result of expanding the borders of $U$ by a distance $r.$
+        <definition id="hausdorff-metric">
+          We define the <em>Hausdorff Metric</em> on $\K$ by $$h(U,V)=\min\{r\geq 0 \mid U\subseteq V_r\text{ and } V\subseteq U_r\}.$$
+        </definition>
+        In other words, the Hausdorff "distance" between two sets is the smallest amount one needs to expand either so each resulting collar contains the other. This minimum quantity is always defined when $U$ and $V$ are compact subsets of $\R^2$, and $h$ is indeed a metric (this result and the next Theorem are proven in <cite to="BBK"></cite>).
+        <theorem>
+          Equipped with the Hausdorff Metric, $\K$ is complete.
+        </theorem>
+        Now that we have a complete metric space, we can define the transformations used in an IFS.
+        <definition id="hutchinson-operator">
+          Suppose that we have an interated function system of contraction mappings $f_1, f_2, \dots, f_k:\R^2\to \R^2$. Then the function
+          \begin{align*}
+            F : \K & \to \K \\
+                 U & \mapsto f_1(U)\cup f_2(U)\cup \dots \cup f_k(U)
+          \end{align*}
+          is called a <em>Hutchinson Operator</em>.
+        </definition>
+        <theorem>
+          Any Hutchinson operator $F:\K\to\K$ is a contraction mapping on $\K$ with respect to the Hausdorff metric.
+        </theorem>
+        <proof collapse="true" open="false">
+          (Adapted from <cite to="BBK"></cite>). Let $c_1, \dots, c_k$ be the contraction constants of the contractions $f_1, \dots, f_k:\R^2\to\R^2.$ We will show that $F$ has contraction constant $c=\max\{c_1,\dots, c_k\}.$
+          <br><br>
+          Take any $U,V\in\K$, write $r=h(U,V)$, and choose any point $x\in F(U).$ Then there exists some $j\in\{1,\dots,k\}$ and some $u\in U$ for which $x=f_j(u)$, so by the definition of the Hausdorff metric, there is some $v\in V$ for which $|u-v|\leq r.$ Since $f_j$ is a contraction, we have
+          $$|x - f_j(v)| = |f_j(u) - f_j(v)|\leq c_j|u-v|\leq cr.$$
+          Clearly, $f_j(v)\in F(V)$, so the inequality above shows that any point of $F(U)$ is within $cr$ of some point of $F(V)$:
+
+          $$F(U)\subseteq F(V)_{cr}.$$
+          It can be symmetrically established that $$F(V)\subseteq F(U)_{cr}.$$ Therefore,
+          $$h(F(U),F(V))\leq cr = c\cdot h(U,V);$$
+          $F$ is a contraction mapping.
+        </proof>
+
+        Now Theorem <ref to="contraction-mapping-principle"></ref> tells us that any Hutchinson operator has a unique fixed point in $\K.$ These fixed points (compact sets in $\R^2$) are the fractals that we will be studying. Specifically, the Hutchinson operators that we will focus our attention to are built using Affine Linear Transformations of $\R^2.$
+        <br><br>
+        Note that the phrase "Iterated Function System" now makes sense: the contraction mapping principle tells us that with hutchinson operator $F$, and any $U\in\K$, the iterative sequence $$U,\ F(U),\ F(F(U)),\ F(F(F(U))),\ \dots$$ converges to a unique fixed point $X$, where $F(X)=X.$
+
+
+
+        <section>Affine Linear Transformations in the Plane</section>
+        In this section we will discuss affine linear transformations from the plane $\R^2$ to itself. These mappings can be represented by matrix multiplication and vector addition: consider the mapping
+          \begin{align*}
+            f: \R^2 & \to \R^2 \\
+                  v & \mapsto Av+b
+          \end{align*}
+        where $A$ is a two-by-two real-valued matrix and $b$ is a vector in $\R^2.$ Alone, multiplication by $A$ is a linear transformation, and with the addition of non-zero $b$, $f$ is affine. We can identify the the plane $\R^2$ with the plane $\R^2\times\{1\}\subseteq \R^3$, and so define these transformations with a single matrix.  The block matrix $$\begin{pmatrix}A & b \\ 0 & 1\end{pmatrix}$$ defines a linear transformation that maps
+        $$\begin{bmatrix}v\\ 1\end{bmatrix}\mapsto \begin{bmatrix}f(v)\\ 1\end{bmatrix}.$$
+        Compositions of affine linear transformations can therefore be seen as products of these $3\times 3$ matrices. Since every affine linear transformation uniquely corresponds to a $3\times 3$ matrix, we will interchangeably refer to the function and its $3\times 3$ standard matrix as the same object.
+        <br><br>
+        There are some "basic" matrices whose actions are naturally understood geometrically. To start, since we already know that $b$ is a translation vector, we can write $\text{Translate}(h,k)$ for the function with standard matrix $$\begin{pmatrix} 1 & 0 & h \\ 0 & 1 & k \\ 0 & 0 & 1 \end{pmatrix};$$ the function that maps
+        $$\begin{bmatrix}x \\ y\\ 1\end{bmatrix}\mapsto \begin{bmatrix}x+h \\ y+k\\ 1\end{bmatrix}.$$
+        We can narrow our focus to the action made by $A.$ The following table shows the $A$ matrices for our basic transformations.
+        <br>
+        <table class="table-bordered" id="basic-transformations" caption="Basic Transformations">
+         <thead>
+           <tr>
+             <th>Function</th>
+             <th>Matrix $A$</th>
+             <th>Mapping</th>
+             <th>Action</th>
+           </tr>
+         <thead>
+         <tbody>
+           <tr>
+             <td>$\Scale(s)$</td>
+             <td>$\begin{pmatrix} s & 0\\ 0 & s \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}sx\\ sy\end{bmatrix}$</td>
+             <td>Scale a vector by $s$ in the $x$ and $y$ directions.</td>
+           </tr>
+           <tr>
+             <td>$\XYScale(s, t)$</td>
+             <td>$\begin{pmatrix} s & 0\\ 0 & t \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}sx\\ ty\end{bmatrix}$</td>
+             <td>Scale a vector by $s$ in the $x$ direction and by $t$ in the $y$ direction.</td>
+           </tr>
+           <tr>
+             <td>$\Rotate(\theta)$</td>
+             <td>$\begin{pmatrix} \cos\theta & -\sin\theta\\ \sin\theta & \cos\theta \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}x\cos\theta-y\sin\theta\\ x\sin\theta+y\cos\theta\end{bmatrix}$</td>
+             <td>Rotate a vector by $\theta$ radians, counter-clockwise around the origin.</td>
+           </tr>
+           <tr>
+             <td>$\XShear(t)$</td>
+             <td>$\begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}x+ty\\ y\end{bmatrix}$</td>
+             <td>Shear a vector in the $x$ direction with a shear parameter $t.$</td>
+           </tr>
+           <tr>
+             <td>$\YShear(t)$</td>
+             <td>$\begin{pmatrix} 1 & 0 \\ t & 1 \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}x\\ tx+y\end{bmatrix}$</td>
+             <td>Shear a vector in the $y$ direction with a shear parameter $t.$</td>
+           </tr>
+         </tbody>
+        </table>
+
+        Now we can ask the question: how can we tell when an affine linear transformation is a contraction mapping?
+
+        <theorem id="operator-norm">
+          A $2\times 2$ matrix $A$ is a contraction if and only if the largest eigenvalue $\lambda_1$ of $A^TA$ is less than 1. In this case, $A$ has contraction constant $\sqrt{\lambda_1}.$
+        </theorem>
+        <proof collapse="true" open="false">
+          (From <cite to="keir"></cite>) A $2\times 2$ matrix is a contraction if and only if there is some $0\leq k < 1$ such that, for all $x,y\in\R^2$, $$|Ax-Ay|\leq k|x-y|;$$
+          equivalently, for all nonzero $v\in\R^2$,
+          $$|Av|\leq k|v|.$$
+          We can now see that $A$ is a contraction exactly when $$|Au|\leq k$$ for all unit vectors $u.$ Since the quantity $|Au|$ is a continuous function of $u$ and $S^1$ is a compact subset of $\R^2$, the maximum value of $|Au|$ exists and is called the <em>operator norm</em> of $A$, denoted $M_A.$ Certainly, if $M_A < 1$, $A$ is a contraction mapping with contraction constant $M_A$, and if $M_A\geq 1$, $A$ is not a contraction mapping. Now we will compute $M_A.$
+          <br><br>
+          Since $A^TA$ is a symmetric real matrix, it has real eigenvalues $\lambda_1\geq \lambda_2$ and is orthogonally diagonalizable:
+          $$A^TA = PDP^{-1},$$
+          where $D$ is the diagonal matrix $$\m{\lambda_1}{0}{0}{\lambda_2}$$ and $P=\begin{pmatrix}v_1 & v_2\end{pmatrix}$ is an orthogonal matrix whose columns are eigenvectors. Therefore, $P^{-1}=P^T$, so if we let $x=P^Tu$, we get
+          \begin{align*}
+            |A u|^{2} & = (A u) \cdot(A u) \\
+                      & = (A u)^{T}(A u) \\
+                      & = u^{T}\left(A^{T} A\right)u \\
+                      & = u^{T}PDP^{-1}u \\
+                      & = u^{T}PDP^Tu \\
+                      & = (u^{T}P)D(P^Tu) \\
+                      & = x^TDx \\
+                      & = x_1^2\lambda_1 + x_2^2\lambda_2.
+          \end{align*}
+          Since $P^T$ is an orthogonal matrix, it preserves the length of vectors, so $M_A^2$ is the maximum value of the expression $$x_1^2\lambda_1 + x_2^2\lambda_2$$ over all unit vectors $x=(x_1,x_2).$ Note further that $|Au|^2$ is non-negative, so we must have $\lambda_1\geq\lambda_2\geq 0.$ The quantity $x_1^2\lambda_1 + x_2^2\lambda_2$ is maximized when $x_1=1$ and $x_2=0.$ This proves that $$M_A = \sqrt{\lambda_1}.$$
+          Therefore, $A$ is a contraction mapping if and only if $\sqrt{\lambda_1} = M_A < 1$, if and only if $\lambda_1 < 1.$
+        </proof>
+
+
+
+        <section>Transformation Decomposition</section>
+
+        One question that can be asked is, given a transformation matrix
+        $$T=\begin{pmatrix}A & b \\ 0 & 1\end{pmatrix},$$
+        how can we understand the action of $A$? (Since we know that $b$ is a translation vector). It turns out that we can make sense of $T$ using only the basic transformations listed in Table <ref to="basic-transformations"></ref>. In the theorem below, we use the following notation: $\arg v$ is the angle $v$ makes with the positive $x$-axis, in the counter clockwise direction, with $\arg v \in [0,2\pi)$.
+        <theorem id="factorizations" title="Factorization of linear transformations">
+          Any linear transformation can be written as the composition of a rotation, shearing, and scaling. In particular, if $A=\begin{pmatrix}A_1 & A_2\end{pmatrix}$ is invertible, then
+          $$A=\Rotate\left(\arg A_1\right)\ \XShear\left(\frac{A_1\cdot A_2}{\det A}\right)\ \XYScale\left(|A_1|, \frac{\det A}{|A_1|}\right).$$
+          If $A$ is not invertible and $A_1\neq 0$, then
+          $$A=\Rotate(\arg A_1)\ \XYScale(|A_1|,0)\ \XShear\left(\frac{|A_2|}{|A_1|}\right).$$
+          If $A_1=0$ and $A_2\neq 0$, then
+          $$A=\Rotate\left(\frac{\pi}{2}-\arg A_2\right)\ \XYScale(0,|A_2|);$$
+          otherwise, $A=\Scale(0).$
+        </theorem>
+        <proof collapse="true" open="false">
+          In the first case, recognize that $\cos(\arg A_1)=\frac{A_{11}}{|A_1|}$ and $\sin(\arg A_1)=\frac{A_{12}}{|A_1|}$, so $$\Rotate(\arg A_1)=\frac{1}{|A_1|}\m{A_{11}}{-A_{12}}{A_{12}}{A_{11}}.$$
+          Then
+          \begin{align*}
+            & \  \Rotate\left(\arg A_1\right)\
+            \XShear\left(\frac{A_1\cdot A_2}{\det A}\right)\
+            \XYScale\left(|A_1|, \frac{\det A}{|A_1|}\right) \\
+            = & \ \frac{1}{|A_1|}
+          \m{A_{11}}{-A_{12}}{A_{12}}{A_{11}}
+          \m{1}{\frac{A_1\cdot A_2}{\det A}}{0}{1}
+          \m{|A_1|}{0}{0}{\frac{\det A}{|A_1|}} \\
+            = & \ \frac{1}{|A_1|}
+          \m{A_{11}}{A_{11}\frac{A_1\cdot A_2}{\det A}-A_{12}}{A_{12}}{A_{12}\frac{A_1\cdot A_2}{\det A}+A_{11}}
+          \m{|A_1|}{0}{0}{\frac{\det A}{|A_1|}}\\
+            = & \ \m{A_{11}}{A_{11}\frac{A_1\cdot A_2}{\det A}-A_{12}}{A_{12}}{A_{12}\frac{A_1\cdot A_2}{\det A}+A_{11}}
+          \m{1}{0}{0}{\frac{\det A}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\left(A_{11}\frac{A_1\cdot A_2}{\det A}-A_{12}\right)\frac{\det A}{|A_1|^2}}{A_{12}}{\left(A_{12}\frac{A_1\cdot A_2}{\det A}+A_{11}\right)\frac{\det A}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\frac{A_{11}(A_1\cdot A_2) - A_{12}\det A}{|A_1|^2}}{A_{12}}{\frac{A_{12}(A_1\cdot A_2) + A_{11}\det A}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\frac{A_{11}(A_{11}A_{21} + A_{12}A_{22}) - A_{12}(A_{11}A_{22} - A_{21}A_{12})}{|A_1|^2}}{A_{12}}{\frac{A_{12}(A_{11}A_{21} + A_{12}A_{22}) + A_{11}(A_{11}A_{22} - A_{21}A_{12})}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\frac{A_{21}(A_{11}^2+A_{12}^2)}{|A_1|^2}}{A_{12}}{\frac{A_{22}(A_{11}^2+A_{12}^2)}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{A_{21}}{A_{12}}{A_{22}}\\
+            = & \ A.
+          \end{align*}
+
+          In the second case, suppose that $A_1\neq 0$, so $A_2=\frac{|A_2|}{|A_1|}A_1.$ Then,
+          \begin{align*}
+              & \ \Rotate(\arg A_1)\ \XYScale(|A_1|,0)\ \XShear\left(\frac{|A_2|}{|A_1|}\right) \\
+            = & \ \frac{1}{|A_1|}\m{A_{11}}{-A_{12}}{A_{12}}{A_{11}} \m{|A_1|}{0}{0}{0} \m{1}{\frac{|A_2|}{|A_1|}}{0}{1}\\
+            = & \ \m{A_{11}}{-A_{12}}{A_{12}}{A_{11}} \m{1}{0}{0}{0} \m{1}{\frac{|A_2|}{|A_1|}}{0}{1}\\
+            = & \ \m{A_{11}}{0}{A_{12}}{0} \m{1}{\frac{|A_2|}{|A_1|}}{0}{1}\\
+            = & \ \m{A_{11}}{\frac{|A_2|}{|A_1|}A_{11}}{A_{12}}{\frac{|A_2|}{|A_1|}A_{12}}\\
+            = & \ \begin{pmatrix}A_1 & \frac{|A_2|}{|A_1|}A_1\end{pmatrix}\\
+            = & \ \begin{pmatrix}A_1 & A_2\end{pmatrix}\\
+            = & \ A.
+          \end{align*}
+
+          In the third case, suppose that $A_1=0.$ If $A_2=0$, is is clear that
+          $$A=\m{0}{0}{0}{0} = \Scale(0).$$
+          Otherwise, $A_2\neq 0$, so
+          \begin{align*}
+              & \ \Rotate\left(\arg A_2 - \frac{\pi}{2}\right)\ \XYScale(0, |A_2|) \\
+            = & \ \m{\cos\left(\arg A_2 - \frac{\pi}{2}\right)}{-\sin\left(\arg A_2 - \frac{\pi}{2}\right)}{\sin\left(\arg A_2 - \frac{\pi}{2}\right)}{\cos\left(\arg A_2 - \frac{\pi}{2}\right)} \m{0}{0}{0}{|A_2|}\\
+            = & \ \m{\sin\left(\arg A_2\right)}{\cos\left(\arg A_2\right)}{-\cos\left(\arg A_2\right)}{\sin\left(\arg A_2\right)} \m{0}{0}{0}{|A_2|}\\
+            = & \ \frac{1}{|A_2|}\m{A_{22}}{A_{21}}{-A_{21}}{A_{22}} \m{0}{0}{0}{|A_2|}\\
+            = & \ \m{A_{22}}{A_{21}}{-A_{21}}{A_{22}} \m{0}{0}{0}{1}\\
+            = & \ \m{0}{A_{21}}{0}{A_{22}}\\
+            = & \ \begin{pmatrix}A_1 & A_2\end{pmatrix}\\
+            = & \ A.
+          \end{align*}
+        </proof>
+
+
+        The next result comes in very handy both conceptually and computationally. We can classify the arguments in the matrix decomposition shown in Theorem <ref to="factorizations"></ref> for invertible matrices that result in contraction mappings. First, a useful lemma:
+
+        <lemma id="eigenvalues-of-a-symmetric-matrix">
+          The largest eigenvalue of a real $2\times 2$ symmetric matrix $$P=\begin{pmatrix}\alpha & \beta \\ \beta & \gamma\end{pmatrix}$$ is less than 1 if and only if $\Trace(P) < \min(2, 1 + \det(P))$.
+        </lemma>
+        <proof collapse="true" open="false">
+          Since $P$ is real and symmetric, it has real eigenvalues. We can find the eigenvalues of $P$ with a charactaristic polynomial:
+          \begin{align*}
+                 & 0 = \det(P-\lambda I) \\
+            \iff & 0 = \lambda^2 - (\gamma + \alpha)\lambda + (\alpha\gamma - \beta^2) \\
+            \iff & \lambda = \frac{(\gamma+\alpha)\pm\sqrt{(\gamma+\alpha)^2-4(\alpha\gamma - \beta^2)}}{2} \\
+            \iff & \lambda = \frac{\Trace(P)\pm\sqrt{\Trace(P)^2-4\det(P)}}{2} \\
+          \end{align*}
+          Then the largest eiegenvalue of $P$ is $\lambda_1 = \frac{\Trace(P)+\sqrt{\Trace(P)-4\det(P)}}{2}$, so
+          \begin{align*}
+            \lambda_1 < 1 \iff & \Trace(P)+\sqrt{\Trace(P)^2-4\det(P)} < 2 \\
+                          \iff & \sqrt{\Trace(P)^2-4\det(P)} < 2 - \Trace(P) \\
+                          \iff & \Trace(P)^2-4\det(P) < (2 - \Trace(P))^2 \quad\text{and}\quad\Trace(P) < 2 \\
+                          \iff & \Trace(P)^2-4\det(P) < 4 - 4\Trace(P) + \Trace(P)^2\quad\text{and}\quad\Trace(P) < 2 \\
+                          \iff & \Trace(P) < \det(P) + 1\quad\text{and}\quad\Trace(P) < 2 \\
+                          \iff & \Trace(P) < \min(2, 1 + \det(P)). \\
+          \end{align*}
+        </proof>
+        <theorem id="contraction-classification">
+          Suppose $A$ is a $2\times 2$ invertible matrix, so $A$ can be written as
+          $$A=\Rotate(\theta)\XShear(w)\XYScale(x,y)$$
+          for some $w,x,y,\theta \in\R$ with $x>0$ and $y\neq 0.$ Then $A$ determines a contraction mapping if and only if $$x^2 < 1, \quad y^2 < 1, \quad\text{and}\quad w^2 < \frac{(1-x^2)(1-y^2)}{y^2}.$$
+        </theorem>
+        <proof collapse="true" open="false">
+          First notice that
+          \begin{align*}
+            A^T & = \XYScale(x,y)^T\XShear(w)^T\Rotate(\theta)^T\\
+                & = \XYScale(x,y)\YShear(w)\Rotate(-\theta),\\
+          \end{align*}
+          so since $\Rotate(-\theta)\Rotate(\theta)=I$, we have that
+          \begin{align*}
+            A^TA & = \XYScale(x,y)\ \YShear(w)\ I\ \XShear(w)\ \XYScale(x,y)\\
+                 & = \m{x}{0}{0}{y}\m{1}{0}{w}{1}\m{1}{w}{0}{1}\m{x}{0}{0}{y} \\
+                 & = \m{x}{0}{0}{y}\m{1}{w}{w}{w^2+1}\m{x}{0}{0}{y} \\
+                 & = \m{x}{wx}{wxy}{y(1+w^2)}\m{x}{0}{0}{y} \\
+                 & = \m{x^2}{wxy}{wxy}{y^2(1+w^2)}. \\
+          \end{align*}
+          By Theorem <ref to="operator-norm"></ref>, $A$ is a contraction if and only if the largest eigenvalue of $A^TA$ is less than 1, which is true by Lemma <ref to="eigenvalues-of-a-symmetric-matrix"></ref> if and only if
+          \begin{align*}
+                 & \Trace(A^TA) < \min(2, 1 + \det(A^TA)) \\
+            \iff & x^2 + y^2(1 + w^2) < \min(2, 1 + x^2y^2(1+w^2) - (wxy)^2) \\
+            \iff & x^2 + y^2 + y^2w^2 < \min(2, 1 + x^2y^2) \\
+            \iff & w^2 < \min\left(\frac{2-(x^2+y^2)}{y^2},\frac{(1-x^2)(1-y^2)}{y^2}\right).
+          \end{align*}
+          From this, we see that $x^2+y^2 < 2$, for if not, $w^2 < 0$. Furthermore, if we suppose indirectly that $y^2 \geq 1$, then $x^2 < 1$ (since $x^2+y^2 < 2$) implying that $w^2 < 0$ because $w^2<\frac{(1-x^2)(1-y^2)}{y^2}$. Hence $y^2 < 1$, and similarly, $x^2 < 1$. Thus with these restrictions,
+          $$\frac{2-(x^2+y^2)}{y^2} > \frac{1+x^2y^2-(x^2+y^2)}{y^2} = \frac{(1-x^2)(1-y^2)}{y^2},$$
+          so
+          $$w^2 < \frac{(1-x^2)(1-y^2)}{y^2}.$$
+
+          <!-- We can use the characteristic polynomial for $A^TA$ to find its eigenvalues $\lambda$:
+          \begin{align*}
+                     & \det(A^TA - \lambda I) = 0 \\
+            \implies & \det \m{b^2 - \lambda}{abc}{abc}{c^2(1+a^2) - \lambda} = 0 \\
+            \implies & (b^2 - \lambda)(c^2(1+a^2) - \lambda) - (abc)^2 = 0 \\
+            \implies & \lambda^2 - (b^2+c^2(a^2+1))\lambda + b^2c^2 = 0\\
+            \implies & \lambda = \frac{b^2+c^2(a^2+1)\pm\sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2 }}{2}.
+          \end{align*}
+          The larger of these two eigenvalues is $\lambda_1 = \frac{b^2+c^2(a^2+1)+\sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2}}{2}.$ Then we know  Well, if $b^2+c^2(1+a^2) < 2 \iff a^2 < \frac{2-b^2-c^2}{c^2}$,
+          \begin{align*}
+            \lambda_1 < 1 \iff & b^2+c^2(a^2+1)+\sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2} < 2 \\
+                          \iff & 2 - b^2+c^2(a^2+1) > \sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2} \\
+                          \iff & (b^2+c^2(a^2+1))^2 - 4b^2c^2 < (b^2+c^2(a^2+1) - 2)^2 \\
+                          \iff & (b^2+c^2(a^2+1))^2 - 4b^2c^2 < (b^2+c^2(a^2+1))^2 -4(b^2+c^2(a^2+1)) + 4 \\
+                          \iff & - 4b^2c^2 < -4(b^2+c^2(a^2+1)) + 4\\
+                          \iff &  b^2c^2 > b^2+c^2(a^2+1) - 1\\
+                          \iff & a^2 < \frac{b^2c^2+1-b^2 - c^2}{c^2}. \\
+          \end{align*}
+          Then $\lambda_1< 1$ if and only if
+          $$a^2 < \min\left(\frac{b^2c^2+1-b^2 - c^2}{c^2}, \frac{2-b^2-c^2}{c^2}\right).$$ -->
+
+        </proof>
+
+        If we let $\C$ denote the set of invertible and affine linear contraction mappings on $\R^2$, $\T=\R^2 \times [0,2\pi) \times E$, and write
+        $$E = \{(w,x,y)\in \R\times(0,1)\times((-1,0)\cup(0,1)) \mid w^2y^2 < (1-x^2)(1-y^2)\},$$
+        then Theorem <ref to="contraction-classification"></ref> implies that the function
+        $$\Phi : \T\to \C$$
+        that maps the 6-tuple of real numbers $(h,k,\theta, w, x, y)\in \T$ to the transformation $$\Translate(h,k)\ \Rotate(\theta)\ \XShear(w)\ \XYScale(x,y)$$
+        is a surjection.
+        <theorem id="path-connected-space">
+          The set $\T$ has exactly two path connected components.
+        </theorem>
+        <proof collapse="true" open="false">
+          The set $\R^2\times [0,2\pi)$ is clearly is path connected, so to prove our theorem we just must show that $E$ has exaclty two path connected components.
+          It is easy to see that given any point $(a,b,c)\in E$, There is a strightline path $\alpha: [0,a]\to E$, given by $\alpha(t)=(t,b,c)$, from $(a,b,c)$ to $(0,b,c)$ since for any $t\in [0,a]$
+          $$t^2 \leq a^2 < \frac{(1-b^2)(1-c^2)}{c^2}.$$
+          In other words, there is a path from any point in $E$, to the subset of $E$
+          $$\{(0,b,c)\in E\} = \{0\}\times(0,1)\times ((-1,0)\cup(0,1)),$$
+          which itself has exaclty two path connected components.
+        </proof>
+        There is clearly some notion of "symmetry" at work here. Let $E^+=E\cap \{y > 0\}$ and $E^-=E\cap\{y < 0\}$. Note that $E$ is this disjoint union of $E^+$ and $E^-$. The proof above shows that $E^-$ and $E^+$ are the path connected components of $E$. In fact, $E^+$ is homeomorphic to $E^-$ via the map $(w,x,y)\mapsto(w,x,-y)$, and $\Phi$ keeps the image of these two sets disjoint: $\C^+ = \Phi(\R^2 \times [0,2\pi)\times E^+)$ and $\C^- =\Phi(\R^2 \times [0,2\pi)\times E^-)$ are disjoint since transformations $Ax+b$ in $\C^+$ have $\det(A)>0$ and transformations in $\C^-$ have $\det(A) < 0$.
+
+        <br>
+
+        Furthermore, consider two "symmetric" points $(w,x,y)\in E^+$ and $(w,x,-y)\in E^-$. Then for any $h,k,\theta\in\R^2\times[0,2\pi)$,
+        \begin{align*}
+          \Phi(h,k,\theta,w,x,-y) & = \Translate(h,k)\ \Rotate(\theta)\ \XShear(w)\ \XYScale(x,-y) \\
+                                  & = \Translate(h,k)\ \Rotate(\theta)\ \XShear(w)\ \XYScale(x,y)\ \YScale(-1) \\
+                                  & = \Phi(h,k,\theta,w,x,y)\ \YScale(-1).
+        \end{align*}
+        Therefore we see that $\C^+$ and $\C^-$ are "symmetric" with respect to transformations that differ by a reflection across the $y$-axis.
+
+
+
+
+
+        <!-- Since each transformation in $\C$ is associated with at least one 6-tuple in $\T$, Theorem <ref to="path-connected-space"></ref> implies that given any two contraction mappings $f_1,f_2:\R^2\to\R^2$, there are paths $\hat{h},\hat{k},\hat{\theta}, \hat{w}, \hat{x}, \hat{y} : I \to \R$ so that
+        $$T(t)=\Phi\left(\hat{h}(t),\hat{k}(t),\hat{\theta}(t), \hat{w}(t), \hat{x}(t), \hat{y}(t)\right) = \begin{cases}f_1 & t=0\\ f_2 & t = 1\end{cases}$$
+        with $T(t)\in\C$ as well for any $t\in I$. -->
+
+        <section id="approximating-an-ifs-fractal-image">Approximating an IFS Fractal Image</section>
+        Now that we have an understanding of what an IFS fractal is and some of its properties, we can discuss methods of generating an image of the fractal. That is, given a Hutchinson operator $F$, what are the computational methods we can use to find the compact $X\subset \R^2$ for which $F(X)=X?$
+        <br><br>
+        To start, we have the brute-force method of "figure iteration". The contraction mapping principle (Theorem <ref to="contraction-mapping"></ref>) tells us that given any initial compact set $X_0\in \K$, the $n$th iteration of $F$ on $X_0$ (written $F^{(n)}(X_0)$) approaches $X$ as $n$ approaches infinity. Therefore, we have a feasible algorithm:
+        <br><br>
+        <ol>
+          <li>Start with any compact subset of $\R^2$ (the unit square, perhaps) as the only element in a set: $L=\{X_0\}.$</li>
+          <li>Apply each of the transformations used to build $F$ to each element of $L.$</li>
+          <li>Re-define $L$ to be the set of the resulting subsets.</li>
+          <li>Go to step 2, or stop.</li>
+        </ol>
+        <br>
+        After repeating this process a large number of times ("going to step 2 instead of stopping"), eventually we will be left with an image of our desired fractal. However, this process is computationally exhausting: suppose the Hutchinson operator is built using $k$ contractions on $\R^2.$ Then $F^{(n)}(X_0)$ is the union of $k^n$ subsets of $\R^2.$ This exponential growth makes this algorithm very memory-inefficient, very quickly.
+        <br><br>
+        Luckily, there is an algorithm in linear time that is commonly used to generate an approximate image of a IFS fractal, called <em>The Chaos Game</em>. Instead of applying each transformation during every iteration, this algorithm uses a randomly chosen one. We outline the algorithm below.
+        <br><br>
+        <ol>
+          <li>Write $f_1,\dots, f_k:\R^2\to\R^2$ for the contraction mappings that are used to build $F.$</li>
+          <li>Choose some discrete probability distribution (called the "weights") $P=(p_1,\dots, p_k)$, where $\sum P = 1$ and $p_i\in(0,1]$ for each $i\in\{1, \dots, k\}.$</li>
+          <li>Begin defining a sequence $(g_n)$ with $g_0=x_0$, any point in $\R^2$, and let $n=1$.</li>
+          <li>With probability $p_i$, let $f=f_i.$</li>
+          <li>Define $g_{n}=f(g_{n-1})$ and increment $n$.</li>
+          <li>Go to step 4, or stop.</li>
+        </ol>
+        For a sufficiently large number of iterations, points in $(g_n)$ converge to the fixed point of $F$. Of course, this requires proof.
+        <theorem id="chaos-game">
+          Given any point $x$ in the fixed point of a Hutchinson operator and any $\e > 0$, the probability that any associated chaos game sequence will contain a point that is within $\e$ of $x$ is 1.
+        </theorem>
+        The following is common notation, where $U\subset\R$:
+          $$\diam(U)=\sup\{|x-y|\mid x,y\in U\}.$$
+        In the proof below, only $U\in\K$ are considered ($U$ is closed) so,
+          $$\diam(U)=\max\{|x-y|\mid x,y\in U\}.$$
+        <proof collapse="true" open="false">
+          Let $\e>0$ be given and suppose $F:\K\to\K$ is a Hutchinson operator defined using contraction mappings $f_1,\dots,f_k:\R^2\to\R^2$ with contraction constants $c_1,\dots, c_k.$ Write $X$ for the unique fixed point of $F.$ Choose any point $r\in\R^2$, and any $x\in X.$ Also, let $P=(p_1,\dots,p_k)$ be any discrete probability distribution with each $p_i>0$ and $\sum_{i=1}^kp_i=1.$ Write $(g_n)$ for any sequence of points generated by the chaos game using $F$ and $P$, based at $r.$ That is, let $(t_n)$ be an infinite sequence of randomly distributed (according to $P$) integers from the set $\N_k = \{1,\dots,k\}$, and
+          $$(g_n)=((f_{t_n}\circ\dots\circ f_{t_{1}})(r) \mid n\in\N).$$
+          We will show that we can find some $N\in\N$ for which $|g_N - x| < \e.$
+          <br><br>
+          Choose any point $x_0\in X$ and consider the sequence
+          $$(h_n)=((f_{t_n}\circ\dots\circ f_{t_{1}})(x_0) \mid n\in\N).$$
+          Since $x_0$ is a member of the fixed set $X$, every term of $(h_n)$ is also in $X$, and since each $f_i$ is a contraction mapping,
+          $$|g_{n+1}-h_{n+1}| \leq c_{t_n+1}|g_n-h_n| < |g_n - h_n|.$$
+          Therefore, we can choose $N_1\in\N$ large enough so that $$|g_n-h_n| < \frac{\e}{2}$$
+          for all $n\in\N$ with $n\geq N_1.$ Now recognize that
+          $$X = F(X) = f_1(X)\cup \dots \cup f_k(X),$$
+          so there must be some $s_1\in\N_k$ for which $x\in f_{s_1}(X).$ Similarly,
+          \begin{align*}
+            f_{s_1}(X) & = f_{s_1}(f_1(X)\cup \dots \cup f_k(X)) \\
+                       & = f_{s_1}(f_1(X))\cup \dots \cup f_{s_1}(f_k(X)),
+          \end{align*}
+          so there is some $s_2\in\N_k$ for which $x\in f_{s_1}(f_{s_2}(X)).$ Continue this process, defining an infinite sequence $(s_n)$, and then use this sequence to build another:
+          $$(A_n) = ((f_{s_1}\circ \dots \circ f_{s_n})(X)\mid n\in\N).$$
+          Clearly, for any $n\in\N$, $x\in A_n$, and since each $f_i$ is a contraction mapping with contraction constant $c_i$,
+          $$\diam(A_{n+1})\leq c_i\diam(A_n)<\diam(A_n).$$
+          In particular, we can choose $m\in\N$ large enough so that $\diam(A_{m})<\frac{\e}{2}.$
+          <br><br>
+          Since the sequence $(t_n)$ is random, there is a probability of 1 (by the infinite monkey Theorem proven in <cite to="monkey"></cite>) that the fininte sequence $s_{m}, \dots, s_{1}$ eventually appears as a continuous subseqence of $(t_n)$ after the $N_1$st term. That is, there is some $N\in\N$ with $N > N_1$, for which
+          $$t_{N - \ell + 1} = s_{1 + \ell - 1}$$
+          for all $\ell\in\N_{m}.$ Then we know that $h_{N-m}\in X$ (if $N=m$, we can write $h_0=x_0\in X$), so
+          \begin{align*}
+            h_{N} & = (f_{t_N}\circ\dots\circ f_{1})(x_0) \\
+                  & = (f_{s_1}\circ\dots\circ f_{s_m}\circ f_{t_{N-m}}\dots\circ f_{t_1})(x_0) \\
+                  & = (f_{s_1}\circ\dots\circ f_{s_m})(h_{N-m}) \\
+                  & \in A_m.
+          \end{align*}
+          Therefore,
+          $$|g_N - x| \leq |g_N - h_N| + |h_N - x| < \e.$$
+        </proof>
+
+        It is important to note in the proof above, that for all $n\in\N$ with $n\geq N_1$, $|g_n-h_n|<\frac\e2$, but we only found a <em>specific</em> $N>N_1$ for which $|g_N-x| < \e.$ This leaves the question: are the points in $(g_n)$ just dense everywhere (which would be uninteresting), or do they stay close to $X$? The answer is the latter, since $(h_n)\subset X$, and for $n\geq N_1$, $(g_n)$ and $(h_n)$ stay arbitrarily close.
+        <br><br>
+        The proof also explains intuitively that the more contraction mappings that are used to defined a Hutchinson Operator, the longer the chaos game might take to converge: the more transformations used, the longer the sequence $(s_n)$ might be, the larger $N$ must be.
+        <br><br>
+        The role of the weights is purely aesthetic: in infinitum, any weight distribution will result in the same fractal image, but computationally restricted to a finite number of iterations, choosing certain $f_i$ to use more or less frequently than others allows the points in the approximated image to be more evenly distributed. It is currently an open problem to determine the "best" way to choose $P$, but <cite to="fractals-for-the-classroom"></cite> suggests defining
+        $$p_i=\frac{\max(\delta, |\det A_i|)}{\sum_{j=1}^k\max(\delta, |\det A_j|)},$$
+        where $\delta$ is some small positive number, and $A_i$ is the real $2\times 2$ matrix associated with contraction mapping $f_i$. This formula makes intuitive sense, since $|\det A_i|$ the area of the the image of the unit square under $f_i$. In the <a href="/playground">playground</a>, we use $\delta = 0.01$ for our "Auto Distribute Weights" feature in order to account for noninvertible transformations whose associated matrices have determinant 0.
+
+        <!-- Recall that $h_{N_1}\in X$, so
+        $$h_{N_3 + N_2 - 1}= (f_{s_{1}}\circ\dots\circ f_{s_{N_2}} \circ\dots\circ f_{t_{N_1+1}})(h_{N_1}) = (f_{t_{N_3+N_2 - 1}}\circ\dots\circ f_{t_{N_1+1}})(h_{N_1}) \in A_{N_3}$$
+
+        Since $\{r\}$ is compact, we can find (by the contraction mapping principle) some $n_1\in\N$ large enough for which there is a point $y\in F^{(n_1)}(r)$ that is within $\gamma(\e)$ of some point $x_1\in X.$ We can write $y = (f_{t_1}\circ\dots\circ f_{t_{n_1}})(r)$ for some $t_1,\dots,t_{n_1}\in\{1,\dots,k\}.$ Notice that the probability that the composition $f_{t_1}\circ\dots\circ f_{t_{n_1}}$ appears in some term of $(c_n)$ is $$p_{t_1}\cdot\dots\cdot p_{t_{n_1}} > 0,$$
+        so if we take $N_1$ large enough, the -->
+
+        <!-- <section>Fractal Dimension</section>
+        A stone thus far left unturned: does the "fractal" that is generated using an IFS indeed satisfy the definition given by Mandelbrot? In order to see that it in fact does we must first explore the idea of fractal dimension. -->
+
+
+
+        <section>Dimension</section>
+
+        <b>Notations:</b>
+        <ul>
+          <li>$X$: a metric space with metric $d_X$</li>
+          <li>$S\subset X$</li>
+          <li>$B_\e(p)$: open ball of radius $\e$ centered at point $p$</li>
+          <li>$N_\e(S)$: the number of boxes of side length $\e$ required to cover $S$</li>
+          <li>$\O(S)$: set of open covers of $S$</li>
+          <li>$M_C(p)$: (given a cover $C$ of $S$ and $p\in S$) $M_C(p)$ is the cardinality of the set $\{U\in C\mid p\in U\}$</li>
+          <li>$\Ref_S(C)$: set of refinements of $C$</li>
+        </ul>
+
+        <subsection>Hausdorf Dimension (from <cite to="hausdorff-wiki"></cite>)</subsection>
+
+
+          <!-- <definition>
+            For any $q\in[0,\infty)$, we define the <b>unlimilted Hausdorff content</b> of $S$ to be
+            $$C_H^q(S)=\inf\left\{\sum_{i}r_i^q\mid \text{there is a cover of $S$ by open balls with radii $r_i>0$}\right\}.$$
+          </definition> -->
+
+          <definition>
+            For $q\geq 0$, the <b>$q$-dimensional Hausdorf measure</b> of $S$ is
+            $$ \mathcal{H}^{q}(S)=\lim_{\e \to 0} \inf \left\{\sum_{i} r_{i}^{q}\mid \text { there is a cover of } S \text { by balls with radii } 0 < r_{i} < \e\right\}.$$
+          </definition>
+
+          <definition>
+            The <b>Hausdorff dimension</b> of $S$ is defined by
+            $$\dim_{\mathrm{H}}(S)=\inf \left\{q \geq 0\mid \mathcal{H}^{d}(S)=0\right\}.$$
+            If we let $Q=\{q\geq 0 \mid \mathcal{H}^q(S)=\infty\}$, then
+            $$\dim_{\mathrm{H}}(S)=\begin{cases} 0 & |Q|=0\\ \sup Q & \text{otherwise}.\end{cases}$$
+          </definition>
+
+          If $I$ is countable and $S=\bigcup_{i\in I} S_i$, then
+          $$\dim_\text{Haus}(S)=\sup_{i\in I}\dim_\text{Haus}(S_i).$$
+
+          If $X$ and $Y$ are non-empty metric spaces, then
+          $$\dim_\text{Haus}(X\times Y)\geq \dim_\text{Haus}(X)+\dim_\text{Haus}(Y).$$
+
+
+        <subsection>Minkowski-Bouligand (Box-Counting) Dimension (from <cite to="box-counting-wiki"></cite>)</subsection>
+          <definition>
+            The Minkowski–Bouligand (box-counting) dimension of $S$ is defined to be the limit
+            $$\dim_\text{box}(S)=\lim_{\e\to\infty}\frac{\log N_\e(S)}{\log(1/\e)}.$$
+            If the above limit does not exist, one may still take the limit superior and limit inferior, which respectively define the <b>upper box dimension</b> and <b>lower box dimension</b>, denoted $\dim_\text{upperbox}$ and $\dim_\text{lowerbox}$.
+          </definition>
+
+
+
+        <subsection>Menger-Urysohn (Inductive) Dimension </subsection>
+        Assume that $S$ is seperable.
+
+        <definition title="(From <cite to='dimension-theory'></cite>)">
+          We define <b>inductive dimension at a point</b> $p$ of $S$, $\dim^p_\text{ind}(S)$, and then <b>inductive dimension</b> of $S$, $\dim_\text{ind}(S)$.
+          <ul>
+            <li>If for all $U$ containing $p$, there is some $V$ with $p\in V\subset U$ and $\partial V = \emptyset$, then $\dim^p_\text{ind}(S)=0$.</li>
+            <li>If $S$ is nonempty and has dimension 0 at each of its points, $\dim_\text{ind}(S)=0$.</li>
+            <li>Only the empty set has dimension $-1$.</li>
+            <li>For $p\in S$, if $\dim^p_\text{ind}(S)\leq n$ and it is not true that $\dim^p_\text{ind}(S)\leq n-1$, then $\dim^p_\text{ind}(S)=n$.</li>
+            <li>If for all $p\in S$, $\dim^p_\text{ind}(S)\leq n$, then $\dim_\text{ind}(S)\leq n$.</li>
+            <li>If $\dim_\text{ind}(S)\leq n$ and $\dim_\text{ind}(S)\leq n - 1$ is false, then $\dim_\text{ind}(S)= n$.</li>
+            <li>If $\dim_\text{ind}(S)\leq n$ is false for each $n\in\N$, then $\dim_\text{ind}(S)=\infty$.</li>
+          </ul>
+        </definition>
+
+        <cite to="lebesgue-wiki"></cite> gives an alternate definition and also defines the large inductive dimension, denoted $\dim_\text{Ind}$.
+        <definition title="(From <cite to='lebesgue-wiki'></cite>)">
+          Let $\dim_\text{ind}(\emptyset)=\dim_\text{Ind}(\emptyset)=-1.$
+          <ul>
+            <li>$\dim_\text{ind}(S)$ is the smallest $n$ such that, for every $x\in S$ and every open set $U$ containing $x$, there is an open set $V$ containing $x$, such that $\overline{V}\subseteq U$, and $\dim_\text{ind}(\partial V)\leq n - 1$.
+            </li>
+            <li>For the large inductive dimension, we restrict the choice of V still further; $\dim_\text{Ind}(S)$ is the smallest $n$ such that, for every closed subset $F$ of every open subset $U$ of $S$, there is an open $V$ in between (that is, $F$ is a subset of $V$ and the closure of $V$ is a subset of $U$), such that $\dim_\text{Ind}(\partial V)\leq n - 1$.</li>
+          </ul>
+        </definition>
+
+
+
+        <subsection>Lebesgue Covering Dimension (From <cite to="lebesgue-wiki"></cite>)</subsection>
+
+        Suppose that $C$ is a cover of $S$.
+        <definition>
+          The <b>order</b> of $C$ (if it exists) is the smallest $n\in\N$ for which all points of $S$ lie in at most $n$ sets in $C$:
+          $$\Ord_S(C)=\min\{n\in\N\mid \forall p\in S, M_C(p)\leq n\}.$$
+        </definition>
+
+        Alternatively, if we decide to understand that the "maximum" of an unbounded subset of $\N$ is $\infty$, then we have
+        $$\Ord_S(C)=\sup M_C(S)=\max\{M_C(p)\mid p\in S\}.$$
+
+        <definition>
+          A <b>refinement</b> of $C$ is an open cover $D$ of $X$ so that every element of $D$ is a subset of an element of $C$.
+        </definition>
+
+        <definition>
+          The <b>covering dimmension</b> of $S$ is the minimum value of $n$ such that every open cover $C$ of $S$ has an open refinement with order $n+1$ or less. If no minimum exists, $S$ has infinite dimension:
+          $$\dim_{LCD}(S) = \min\{n\in\N\mid \forall C\in\O(S), \exists D\in\Ref_S(C),\Ord_S(D)\leq n+1\}.$$
+        </definition>
+
+        In other words, the covering dimension of $S$ is $n$ if and only if
+        <ol>
+          <li>every open cover of $S$ has a refinement with order $n+1$ or less, and</li>
+          <li>there is some open cover with no refinment of order $n$ or less;
+            <ul><li style="list-style-type:none">$\Leftarrow$ there is no open cover of order $n$ or less.
+          </li>
+        </ol>
+
+
+        <subsection>Connections Between Dimensions</subsection>
+
+        <table class="table-bordered" style="font-size:0.75em">
+          <tr>
+            <th></th>
+            <th>Hausdorff</th>
+            <th>Box Counting</th>
+            <th>Inductive</th>
+            <th>Lesbesgue</th>
+          </tr>
+          <tr>
+            <th>Hausdorff</th>
+            <td style="background-color:grey"></td>
+            <td>$$\dim_\text{Haus}\leq \dim_\text{lowerbox}\leq \dim_\text{upperbox}.$$ It is possible that both inequalities are strict. <cite to="box-counting-wiki"></cite></td>
+            <td>If $S$ is non-empty, then $\dim_\text{Haus}(S) \geq \dim_\text{ind}(S)$. Moreover,
+            $$\inf_{R\cong S} \dim_\text{Haus}(R) = \dim_\text{ind}(S).$$ <cite to="hausdorff-wiki"></cite></td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Box Counting</th>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Inductive</th>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td>$$\dim_\text{LCD}(S)=0 \iff \dim_\text{Ind}(S)=0.$$ When $S$ is normal with a countable base,
+              $$\dim_\text{LCD}(S)=\dim_\text{Ind}(S)=\dim_\text{ind}(S).$$
+            The Nöbeling–Pontryagin theorem then states that such spaces with finite dimension are characterised up to homeomorphism as the subspaces of the Euclidean spaces. If $S$ is metrizable,
+            $$\dim_\text{ind}(S)\leq\dim_\text{Ind}(S)=\dim_\text{LCD}(S).$$
+            If $S$ is compact and Hausdorff,
+            $$\dim_\text{LCD}(S)\leq\dim_\text{ind}(S)\leq\dim_\text{Ind}(S).$$ Either inequality here may be strict; an example of Vladimir V. Filippov shows that the two inductive dimensions may differ. <cite to="inductive-wiki"></cite>
+          </td>
+          </tr>
+          <tr>
+            <th>Lesbesgue</th>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+          </tr>
+        </table>
+
+
+
+
+
+
+        <hr>
+        <references>
+          <item id="keir">Keir H. Lockridge, Personal Communication, 2020.</item>
+          <item id="BBK">Benjamin B. Kennedy, <em>Introduction to Real Analysis</em>, Gettysburg College 2018.</item>
+          <item id="fractals-for-the-classroom">Evan Maletsky, Terry Perciante, and Lee Yunker, <em>Fractals for the Classroom, Part 1: Introduction to Fractals and Chaos</em>, 1992.</item>
+          <item id="monkey">Richard E. Isaac, <em>The Pleasures of Probability</em>, Springer 1995.</item>
+          <item id="hausdorff-wiki"><a href="https://en.wikipedia.org/wiki/Hausdorff_dimension" class="highlight">Hausdorff Dimension on Wikipedia</a></item>
+          <item id="box-counting-wiki"><a href="https://en.wikipedia.org/wiki/Minkowski%E2%80%93Bouligand_dimension" class="highlight">Box-counting dimension on Wikipedia</a></item>
+          <item id="lebesgue-wiki"><a href="https://en.wikipedia.org/wiki/Lebesgue_covering_dimension" class="highlight">Lebesgue covering dimension on Wikipedia</a></item>
+          <item id="inductive-wiki"><a href="https://en.wikipedia.org/wiki/Inductive_dimension" class="highlight">Inductive dimension on Wikipedia</a></item>
+          <item id="dimension-theory">Witold Hurewicz and Henry Wallman. <em>Dimension Theory.</em> 1941.</item>
+        </references>
+      </div>
+    </div>
+  </div>
+
+
+  </body>
+
+  <script type="text/x-mathjax-config">
+    new HTMLTeX(document.getElementById('LaTeX'), MathJax).render({
+      'highlight_links':true
+    });
+  </script>
+</html>

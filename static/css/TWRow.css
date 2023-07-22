@@ -1,0 +1,77 @@
+
+table {
+  /* border-collapse: collapse; */
+  table-layout: fixed;
+}
+
+.transformation-dialogue {
+  width: 100%;
+}
+
+.color-cell {
+  width: 1%;
+}
+
+.guppy-container {
+  display: table-cell;
+  margin: 0px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* this needs to be better */
+  box-shadow: inset 0 0 1px black;
+}
+
+.guppy-container div {
+  outline: 0;
+  border: 0px;
+  background-color: transparent;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+}
+
+.weight-container {
+  width: 15%;
+  padding: -2px !important;
+  height: 100%;
+  overflow: hidden;
+  background-color: transparent;
+  box-shadow: inset 0 0 1px black;
+  cursor: text;
+}
+
+.weight-container > input {
+  /* display: inline-block !important;
+  position: relative  !important;
+  top: 0;
+
+  height: 100% !important; */
+
+  /* padding-top: calc(20% - 0.6em);
+  padding-bottom: calc(20% - 0.6em); */
+  color: black;
+  /* height: 44px; */
+  display: inline-block !important;
+  font-family: serif;
+  font-size: 1.2em;
+  border: 0;
+  border-radius: 0px;
+  outline: 0;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  margin: 2px;
+  width: calc(100% - 4px);
+  user-select: none;
+}
+
+.trash-container {
+  width: 40px;
+}
+
+.trash-container > a {
+  color: grey;
+}
+
+.trash-container > a:hover {
+  color: red;
+  transition: 0.5s ease;
+}

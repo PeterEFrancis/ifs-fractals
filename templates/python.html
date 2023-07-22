@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>IFS Fractals : Python Docs</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="/static/img/leaf.gif" type="image/gif">
+
+    <!-- redirect to mobile -->
+    <script language="javascript">
+      if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        if (confirm("Your device might not be suitable for the fractal playground.\n\nClick 'Cancel' to continue, and 'OK' to return to IFS-Fractal home.")) {
+          window.location.href = '/';
+        }
+      }
+    </script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$','$'], ['\\(','\\)']]
+        }
+      });
+    </script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+    <!-- MathJs -->
+    <script src="/static/js/math.js"></script>
+
+
+    <style>
+
+      body {
+        min-width: 300px;
+      }
+
+      .navbar {
+        margin-bottom: 0;
+        border-radius: 0;
+      }
+      br {
+        user-select: none;
+      }
+
+    </style>
+  </head>
+  <body>
+
+  {{navbar|safe}}
+
+  <div class="container">
+    <div class="row" style="margin-bottom: 10px;">
+      <div class="col-sm-8">
+        <h1>Python Docs</h1>
+        <h4>Contents</h4>
+        <ul>
+          <li><a href="#installation">Installation</a></li>
+          <li><a href="#examples">Examples</a></li>
+          <li><a href="#usage">Usage</a></li>
+        </ul>
+        
+        <h3 id="installation">Install <strong>ifsFractals</strong> from <a href="https://pypi.org/project/ifsFractals/" target="_blank">PyPi</a></h3>
+          <pre>pip install ifsFractals</pre>
+          <h3>Quickstart Example</h3>
+<pre>
+# import ifsFractals module
+import ifsFractals as ifs
+
+# define transformations
+T_1 = Scale(1/2)
+T_2 = Translate(1/2, 0) @ Scale(1/2)
+T_3 = Translate(1/4, 1/2) @ Scale(1/2)
+T = [T_1, T_2, T_3]
+
+# create fractal object
+fractal = ifs.Fractal(T)
+
+# add points and plot
+fractal.add_points(100_000)
+fractal.display()
+</pre>
+      </div>
+    </div>
+  </div>
+
+  </body>
+</html>
+
+
+
+
+
+

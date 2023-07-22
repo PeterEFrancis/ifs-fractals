@@ -1,0 +1,26 @@
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="\">IFS Fractals</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li {% if active == 'math' %} class="active" {% endif %}><a href="\math">Math</a></li>
+        <li {% if active == 'playground' %} class="active" {% endif %}><a href="\playground">Playground</a></li>
+        <li {% if active == 'sandbox' %} class="active" {% endif %}><a href="\sandbox">Sandbox</a></li>
+        <li {% if active == 'saved' %} class="active" {% endif %}><a href="\saved">Saved</a></li>
+        <li {% if active == 'word-fractals' %} class="active" {% endif %}><a href="\word-fractals">Word Fractals</a></li>
+        <li {% if active == 'python' %} class="active" {% endif %}><a href="\python">Python Docs</a></li>
+        <!-- <li><a href="#">Transformation Maker</a></li>
+        <li><a href="#">Experiment</a></li>
+        <li><a href="#">Batch</a></li> -->
+        <!-- <li><a href="#">Animations</a></li> -->
+      </ul>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,288 @@
+  <!-- The word <strong>fractal</strong> has gotten much abuse: its definition is often misquoted or changed, and although many people seem to have an intuitive understanding of basic "fractal-like" shapes, many people do not know that fractals do not have to be self-similar.  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- We will use the following definition (given by Benoit Mandelbrot in 1975):
+<definition id="fractal">
+  A <em>fractal</em> is a subset of the plane $\R^2$ whose Hausdorff–Besicovitch dimension is strictly greater than its topological dimension.
+</definition>
+The idea of fractal dimension will be explored below. -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- We can use the characteristic polynomial for $A^TA$ to find its eigenvalues $\lambda$:
+\begin{align*}
+           & \det(A^TA - \lambda I) = 0 \\
+  \implies & \det \m{b^2 - \lambda}{abc}{abc}{c^2(1+a^2) - \lambda} = 0 \\
+  \implies & (b^2 - \lambda)(c^2(1+a^2) - \lambda) - (abc)^2 = 0 \\
+  \implies & \lambda^2 - (b^2+c^2(a^2+1))\lambda + b^2c^2 = 0\\
+  \implies & \lambda = \frac{b^2+c^2(a^2+1)\pm\sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2 }}{2}.
+\end{align*}
+The larger of these two eigenvalues is $\lambda_1 = \frac{b^2+c^2(a^2+1)+\sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2}}{2}.$ Then we know  Well, if $b^2+c^2(1+a^2) < 2 \iff a^2 < \frac{2-b^2-c^2}{c^2}$,
+\begin{align*}
+  \lambda_1 < 1 \iff & b^2+c^2(a^2+1)+\sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2} < 2 \\
+                \iff & 2 - b^2+c^2(a^2+1) > \sqrt{(b^2+c^2(a^2+1))^2 - 4b^2c^2} \\
+                \iff & (b^2+c^2(a^2+1))^2 - 4b^2c^2 < (b^2+c^2(a^2+1) - 2)^2 \\
+                \iff & (b^2+c^2(a^2+1))^2 - 4b^2c^2 < (b^2+c^2(a^2+1))^2 -4(b^2+c^2(a^2+1)) + 4 \\
+                \iff & - 4b^2c^2 < -4(b^2+c^2(a^2+1)) + 4\\
+                \iff &  b^2c^2 > b^2+c^2(a^2+1) - 1\\
+                \iff & a^2 < \frac{b^2c^2+1-b^2 - c^2}{c^2}. \\
+\end{align*}
+Then $\lambda_1< 1$ if and only if
+$$a^2 < \min\left(\frac{b^2c^2+1-b^2 - c^2}{c^2}, \frac{2-b^2-c^2}{c^2}\right).$$ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Since each transformation in $\C$ is associated with at least one 6-tuple in $\T$, Theorem <ref to="path-connected-space"></ref> implies that given any two contraction mappings $f_1,f_2:\R^2\to\R^2$, there are paths $\hat{h},\hat{k},\hat{\theta}, \hat{w}, \hat{x}, \hat{y} : I \to \R$ so that
+$$T(t)=\Phi\left(\hat{h}(t),\hat{k}(t),\hat{\theta}(t), \hat{w}(t), \hat{x}(t), \hat{y}(t)\right) = \begin{cases}f_1 & t=0\\ f_2 & t = 1\end{cases}$$
+with $T(t)\in\C$ as well for any $t\in I$. -->
+
+
+
+
+
+
+
+
+
+<!-- Recall that $h_{N_1}\in X$, so
+$$h_{N_3 + N_2 - 1}= (f_{s_{1}}\circ\dots\circ f_{s_{N_2}} \circ\dots\circ f_{t_{N_1+1}})(h_{N_1}) = (f_{t_{N_3+N_2 - 1}}\circ\dots\circ f_{t_{N_1+1}})(h_{N_1}) \in A_{N_3}$$
+
+Since $\{r\}$ is compact, we can find (by the contraction mapping principle) some $n_1\in\N$ large enough for which there is a point $y\in F^{(n_1)}(r)$ that is within $\gamma(\e)$ of some point $x_1\in X.$ We can write $y = (f_{t_1}\circ\dots\circ f_{t_{n_1}})(r)$ for some $t_1,\dots,t_{n_1}\in\{1,\dots,k\}.$ Notice that the probability that the composition $f_{t_1}\circ\dots\circ f_{t_{n_1}}$ appears in some term of $(c_n)$ is $$p_{t_1}\cdot\dots\cdot p_{t_{n_1}} > 0,$$
+so if we take $N_1$ large enough, the -->
+
+<!-- <section>Fractal Dimension</section>
+A stone thus far left unturned: does the "fractal" that is generated using an IFS indeed satisfy the definition given by Mandelbrot? In order to see that it in fact does we must first explore the idea of fractal dimension. -->
+
+
+
+
+
+
+
+
+
+
+<!-- <definition title="Menger-Urysohn (Inductive) Dimension <cite to='dimension-theory'></cite>">
+  Assuming $S$ is separable, we define <b>inductive dimension at a point</b> $p$ of $S$, $\dim^p_\text{ind}(S)$, and then <b>inductive dimension</b> of $S$, $\dim_\text{ind}(S)$.
+  <ol>
+    <li>$\dim_\text{ind}(S)=-1$ if and only if $S=\emptyset$.</li>
+    <li>$\dim^p_\text{ind}(S)=0$ if for all open $U\ni p$, there is some open $V$ with $p\in V\subset U$ and $\partial V = \emptyset$.</li>
+    <li>$\dim_\text{ind}(S)=0$ if $S\neq\emptyset$ and $\dim^p_\text{ind}(S)=0$ for all $p\in S$.</li>
+    <li>$\dim^p_\text{ind}(S)\leq n$ if for all open $U\ni p$, there is some open $V$ with $p\in V\subseteq U$, for which $\dim_\text{ind}(\partial V)\leq n - 1$.</li>
+    <li>$\dim_\text{ind}(S)\leq n$ if $\dim^p_\text{ind}(S)\leq n$ for each $p\in S$.</li>
+    <li>$\dim^p_\text{ind}(S)=n$ if $\dim^p_\text{ind}(S)\leq n$ and $\dim^p_\text{ind}(S)\leq n-1$ is false.</li>
+    <li>$\dim_\text{ind}(S)= n$ if $\dim_\text{ind}(S)\leq n$ and $\dim_\text{ind}(S)\leq n - 1$ is false.</li>
+    <li>$\dim_\text{ind}(S)=\infty$ if $\dim_\text{ind}(S)\leq n$ is false for each $n\in\N$.</li>
+  </ol>
+</definition> -->
+
+<!-- We have an alternate definition from <cite to="inductive-wiki"></cite> that includes the large inductive dimension, denoted $\dim_\text{Ind}$.
+<definition title="Inductive dimension <cite to='inductive-wiki'></cite>">
+  Let $\dim_\text{ind}(\emptyset)=\dim_\text{Ind}(\emptyset)=-1.$
+  <ul>
+    <li>$\dim_\text{ind}(S)$ is the smallest $n$ such that, for every $x\in S$ and every open set $U$ containing $x$, there is an open set $V$ containing $x$, such that $\overline{V}\subseteq U$, and $\dim_\text{ind}(\partial V)\leq n - 1$.
+    </li>
+    <li>For the large inductive dimension, we restrict the choice of V still further; $\dim_\text{Ind}(S)$ is the smallest $n$ such that, for every closed subset $F$ of every open subset $U$ of $S$, there is an open $V$ in between (that is, $F$ is a subset of $V$ and the closure of $V$ is a subset of $U$), such that $\dim_\text{Ind}(\partial V)\leq n - 1$.</li>
+  </ul>
+</definition> -->
+
+<!-- We have an alternate definitions from <cite to="engelking"></cite>. -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- The following three defintions come from <cite to="lebesgue-wiki"></cite>.
+
+<definition title="The order of a cover">
+  The <b>order</b> of $C$ (if it exists) is the smallest $n\in\N$ for which all points of $S$ lie in at most $n$ sets in $C$:
+  $$\Ord_S(C)=\min\{n\in\N\mid \forall p\in S, M_C(p)\leq n\}.$$
+</definition>
+
+Alternatively, if we decide to understand that the "maximum" of an unbounded subset of $\N$ is $\infty$, then we have
+$$\Ord_S(C)=\sup M_C(S)=\max\{M_C(p)\mid p\in S\}.$$
+
+<definition title="A refinement of a cover">
+  A <b>refinement</b> of $C$ is an open cover $D$ of $X$ so that every element of $D$ is a subset of an element of $C$.
+</definition>
+
+We let $\Ref_S(C)$ be the set of refinements of $C$, and write $\O(S)$ for the set of open covers of $S$.
+
+<definition title="Lesbegue Covering dimension">
+  The <b>covering dimension</b> of $S$ is the minimum value of $n$ such that every open cover $C$ of $S$ has an open refinement with order $n+1$ or less. If no minimum exists, $S$ has infinite dimension:
+  $$\dim_{LCD}(S) = \min\{n\in\N\mid \forall C\in\O(S), \exists D\in\Ref_S(C),\Ord_S(D)\leq n+1\}.$$
+</definition>
+-->
+
+
+
+
+
+
+
+
+
+
+
+<!-- Notationally,
+$$\dim_{LCD}(S) = \min\{n\in\N\mid \forall C\in\O(S), \exists D\in\Ref_S(C),\Ord_S(D)\leq n+1\}.$$ -->
+
+
+
+
+
+
+
+
+
+<!-- Alternatively (from <cite to="hausdorff-wiki"></cite>), <span style="color: red">(check that these are actually equivalent)</span> we can let
+$$ \mathcal{H}^{q}(S)=\lim_{\e \to 0} \inf \left\{\sum_{i} r_{i}^{q}\mid \text { there is a cover of } S \text { by balls with radii } 0 < r_{i} < \e\right\},$$
+and define the <b>Hausdorff dimension</b> of $S$ by
+  $$\dim_\text{Haus}(S)=\inf \left\{q \geq 0\mid \mathcal{H}^{d}(S)=0\right\}.$$
+Furthermore, if we let $Q=\{q\geq 0 \mid \mathcal{H}^q(S)=\infty\}$, then
+  $$\dim_\text{Haus}(S)=\begin{cases} 0 & |Q|=0\\ \sup Q & \text{otherwise}.\end{cases}$$
+
+If $I$ is countable and $S=\bigcup_{i\in I} S_i$, then
+$$\dim_\text{Haus}(S)=\sup_{i\in I}\dim_\text{Haus}(S_i).$$
+
+If $X$ and $Y$ are non-empty metric spaces, then
+$$\dim_\text{Haus}(X\times Y)\geq \dim_\text{Haus}(X)+\dim_\text{Haus}(Y).$$ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- <table class="table-bordered" style="font-size:0.75em">
+          <tr>
+            <th></th>
+            <th>Hausdorff</th>
+            <th>Box Counting</th>
+            <th>Inductive</th>
+            <th>Lesbesgue</th>
+          </tr>
+          <tr>
+            <th>Hausdorff</th>
+            <td style="background-color:grey"></td>
+            <td>$$\dim_\text{Haus}\leq \dim_\text{lowerbox}\leq \dim_\text{upperbox}.$$ It is possible that both inequalities are strict. <cite to="stonybrook"></cite></td>
+            <td>If $S$ is non-empty, then $\dim_\text{Haus}(S) \geq \dim_\text{ind}(S)$. Moreover,
+            $$\inf_{R\cong S} \dim_\text{Haus}(R) = \dim_\text{ind}(S).$$ <cite to="dimension-theory"></cite></td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Box Counting</th>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>Inductive</th>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td>
+              From <cite to="engelking"></cite>: <span style="color: red">Find source for when inequality can be strict.</span>
+              <ul>
+                <li>If $S$ is normal, then $\dim_\text{LCD}(S)=0$ and $\dim_\text{Ind}(S)=0$ are equivalent.</li>
+                <!- <li>If $S$ is a seperable metric space, then $$\dim_\text{LCD}(S)\leq \dim_\text{ind}(S) \leq \dim_\text{Ind}(S)$$.</li> ->
+                <li>If $S$ is a compact metric space, then $$\dim_\text{ind}(S) \leq \dim_\text{LCD}(S)$$.</li>
+                <li>If $S$ is seperable metric space, then $$\dim_\text{LCD}(S) = \dim_\text{ind}(S) = \dim_\text{Ind}(S).$$</li>
+              </ul>
+
+            <span style="color: red"> When $S$ is normal with a countable base,
+            $$\dim_\text{LCD}(S)=\dim_\text{Ind}(S)=\dim_\text{ind}(S).$$ The Nöbeling–Pontryagin theorem then states that such spaces with finite dimension are characterised up to homeomorphism as the subspaces of the Euclidean spaces.</span>
+          </td>
+          </tr>
+          <tr>
+            <th>Lesbesgue</th>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+            <td style="background-color:grey"></td>
+          </tr>
+        </table> -->
+
+
+
+
+
+
+
+
+
+
+        <!-- <item id="hausdorff-wiki"><a href="https://en.wikipedia.org/wiki/Hausdorff_dimension" class="highlight">Hausdorff Dimension on Wikipedia</a></item> -->
+        <!-- <item id="box-counting-wiki"><a href="https://en.wikipedia.org/wiki/Minkowski%E2%80%93Bouligand_dimension" class="highlight">Box-counting dimension on Wikipedia</a></item> -->
+        <!-- <item id="lebesgue-wiki"><a href="https://en.wikipedia.org/wiki/Lebesgue_covering_dimension" class="highlight">Lebesgue covering dimension on Wikipedia</a></item> -->
+        <!-- <item id="inductive-wiki"><a href="https://en.wikipedia.org/wiki/Inductive_dimension" class="highlight">Inductive dimension on Wikipedia</a></item> -->

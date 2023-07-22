@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>IFS Fractals : Playground</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="shortcut icon" href="/static/img/leaf.gif" type="image/gif">
+
+  <!-- redirect to mobile -->
+  <script language="javascript">
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+      if (confirm("Your device might not be suitable for the fractal playground.\n\nClick 'Cancel' to continue, and 'OK' to return to IFS-Fractal home.")) {
+        window.location.href = '/';
+      }
+    }
+  </script>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']]
+      }
+    });
+  </script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+  <!-- Guppy -->
+  <link rel="stylesheet" href="/static/guppy/guppy-default.min.css">
+  <script type="text/javascript" src="/static/guppy/guppy.min.js"></script>
+
+  <!-- Class styles -->
+  <link rel="stylesheet" href="/static/css/variableSlider.css">
+  <link rel="stylesheet" href="/static/css/TWRow.css">
+  <link rel="stylesheet" href="/static/css/Cartesian.css">
+
+  <!-- MathJs -->
+  <script src="/static/js/math.js"></script>
+
+  <!-- fontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+
+
+  <style>
+
+    body {
+      min-width: 600px;
+    }
+
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    canvas {
+      width: 100%;
+      border: 1px solid black;
+      max-width: 1000px;
+    }
+
+    .matrix {
+      /* font-family: monospace; */
+      margin: 0px;
+      display: inline;
+    }
+
+    .paren {
+      margin: 10px;
+      white-space: nowrap;
+    }
+
+    .paren:after, .paren:before {
+      content: " ";
+      padding:10px 5px 40px 1px;
+      border-bottom:2px solid #666;
+      border-top:2px solid #666;
+    }
+
+    .paren:before {
+      border-left:2px solid #666;
+      margin-right:0px;
+    }
+    .paren:after {
+      border-right:2px solid #666;
+      margin-left:-5px;
+    }
+
+    .matrix > tr > td {
+      width: 20%;
+      /* text-align: center; */
+    }
+
+    br {
+      user-select: none;
+    }
+
+    a:hover {
+      cursor: pointer;
+    }
+
+    .info-circ {
+      font-size: .75em;
+    }
+
+    button {
+      outline: 0px;
+    }
+
+    .trans-td {
+      font-family: monospace;
+    }
+
+  </style>
+</head>
+<body>
+
+{{navbar|safe}}
+
+<div class="container-fluid" style="max-width: 1500px;">
+  <div class="row" style="margin-bottom: 10px;">
+    <div class="col-sm-8">
+      <h1>Playground</h1>
+    </div>
+    <div class="col-sm-4 text-right">
+      <div class="input-group" style="margin-top: 20px;">
+        <input id="title" class="form-control" style="font-size: 1.75em; height:100%" value='' placeholder="Playground title" oninput="document.getElementById('save-button').disabled=this.value=='';"/>
+        <span class="input-group-btn">
+          <button id="save-button" class="btn btn-primary" onclick="save()">
+            <span class="glyphicon glyphicon-floppy-save" style="font-size:1.75em;"></span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom: 30px;">
+    <div class="col-md-12">
+      Examples:
+      <a href="\playground\1">Barnsley Fern</a> &middot;
+      <a href="\playground\4">Serpinski Triangle</a> &middot;
+      <a href="\playground\6">Von Koch Curve</a> &middot;
+      <a href="\playground\3">Dragon</a> &middot;
+      <a href="\playground\2">Crab</a> &middot;
+      <a href="\playground\5">Tree</a>
+    </div>
+  </div>
+
+  <!-- <div class="row" style="margin-bottom: 40px;">
+    <div class="col-md-6">
+      <p>Upload a *.ifs file to load into the playground.</p>
+      <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-cloud-upload"></span> Upload</button>
+    </div>
+  </div> -->
+  <div class="row">
+    <div class="col-md-7" style="padding-bottom: 15px;">
+      <div class="row">
+        <div class="col-xs-8">
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#import-modal" href="#import-modal">
+            <span class="glyphicon glyphicon-import"></span> Import
+          </button>
+        </div>
+        <div class="col-xs-4 text-right">
+          <div class="input-group">
+            <input id="random-number" class="form-control" value="4" style="padding-right:0px;"/>
+            <span class="input-group-btn">
+              <button class="btn btn-default" onclick="location.href='/random/' + document.getElementById('random-number').value">Random Fractal</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+      <div id="import-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Import</h4>
+            </div>
+            <div class="modal-body">
+              <!-- <p></p> -->
+              <textarea id="import-matrices-lines" style="width: 100%; font-family: monospace;" rows="10" cols="40"></textarea>
+              <p id="import-error" style="color: red"></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" onclick="import_matrices();">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-xs-8">
+          <h3>
+            Transformations and Weights
+            <a class="info-circ" data-toggle="modal" data-target="#transformations-modal" href="#transformations-modal">
+              <span class="glyphicon glyphicon-info-sign"></span>
+            </a>
+          </h3>
+        </div>
+        <div class="col-xs-4">
+        </div>
+      </div>
+      <div id="transformations-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Transformations and Weights</h4>
+            </div>
+            <div class="modal-body">
+              <h5>Built-in Transformations</h5>
+                <table class="table" id="trans-table">
+                  <tr>
+                    <th style="width: 30%">Command</th>
+                    <th>Mapping</th>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">Scale(s)</span></td>
+                    <td>\((x,y)\mapsto(sx,sy)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">XScale(s)</span></td>
+                    <td> \((x,y)\mapsto(sx,y)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">YScale(s)</span></td>
+                    <td> \((x,y)\mapsto(x,sy)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">XYScale(s,t)</span></td>
+                    <td> \((x,y)\mapsto(sx,ty)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">Translate(h,k)</span></td>
+                    <td> \((x,y)\mapsto(x+h,y+k)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">Rotate(theta)</span></td>
+                    <td> \((x,y)\mapsto(x\cos\theta-y\sin\theta, x\sin\theta+y\cos\theta)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">XShear(t)</span></td>
+                    <td> \((x,y)\mapsto(x+ty,y)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">YShear(t)</span></td>
+                    <td> \((x,y)\mapsto(x,xt+y)\)</td>
+                  </tr>
+                  <tr>
+                    <td><span class="trans-td">M(a,b,c,d,f,g)</span></td>
+                    <td> \((x,y)\mapsto(ax+by+f,cx+dy+g)\)</td>
+                  </tr>
+                </table>
+
+              <p>Compose functions with <code>·</code> or adjacency, and rememeber that these functions operate from right to left!</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div id="TW-container" style="width: 100%"></div>
+      <div class="row" style="margin-top: 20px;">
+        <div class="col-xs-2">
+          <button type="button" class="btn btn-default btn-sm" onclick="tw_row_group.add_row();">
+            <span class="glyphicon glyphicon-plus"></span>
+          </button>
+        </div>
+        <div class="col-xs-10 text-right">
+          <button class="btn btn-default btn-sm" onclick="equalize_weights();">Equalize Weights</button>
+          <div class="btn-group">
+            <button class="btn btn-default btn-sm" onclick="autodistribute();" style="width: calc(100% - 35px)">Auto Distribute Weights</button>
+            <button id="auto-distribute-lock" class="btn btn-default btn-sm" onclick="toggle_auto_distribute_lock();" style="width:35px;">
+              <i class="fa fa-unlock" id="auto-distribute-lock-icon"></i>
+            </button>
+          </div>
+          <a class="info-circ" data-toggle="modal" data-target="#weights-modal" href="#transformations-modal" style="margin: 0px 12px 0px 12px;">
+            <span class="glyphicon glyphicon-info-sign"></span>
+          </a>
+        </div>
+      </div>
+
+
+      <div id="weights-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Equalize and Autodistribute Weights</h4>
+            </div>
+            <div class="modal-body">
+              <h5>Equilize Weights</h5>
+              The "Equilize Weigths" button will set each weight to $1/n$, where $n$ is the number of transformations.
+              <h5>Auto Distribute Weigts</h5>
+              The "Auto Distribute Weights" button will set the weight $p_i$ for the $i$th transformation using the standard matrix $A_i$ and the value $\delta = 0.01$:
+              $$p_i=\frac{\max(\delta, |\det A_i|)}{\sum_{j=1}^k\max(\delta, |\det A_j|)}.$$
+              The lock button, when enabled, will automatically distribute the weights after any change is made.
+              <br>
+              For more information on the weights and what they are used for, see <a href="/math#approximating-an-ifs-fractal-image">here</a>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <h3 style="margin-top: 60px;">Variable Sliders</h3>
+      <div id="variable-row-container" style="width: 100%"></div>
+      <button type="button" class="btn btn-default btn-sm" onclick="variable_group.add_next_variable();">
+        <span class="glyphicon glyphicon-plus"></span>
+      </button>
+
+      <h3 style="margin-top: 60px;">Raw Transformations</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 5px;"></th><th>Matrix</th><th>Weight</th><th>Factorization</th><th>Use</th>
+          </tr>
+        </thead>
+        <tbody id="raw-transformation-list"></tbody>
+      </table>
+      <button type="button" class="btn btn-default" data-toggle="modal" data-target="#export-modal" href="#export-modal" onclick="export_info_to_module()">
+        <span class="glyphicon glyphicon-export"></span> Export
+      </button>
+      <div id="export-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Export</h4>
+            </div>
+            <div class="modal-body">
+              <h4>Matrices</h4>
+              <textarea id="export-matrices" style="width: 100%; font-family: monospace;" rows="5" cols="40" readonly></textarea>
+              <h4>Info JSON</h4>
+              <textarea id="info-json" style="width: 100%; font-family: monospace;" rows="10" cols="40" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
+    <div class="col-md-5">
+      <canvas id="fractal" class="center-block"></canvas>
+      <p id="fractal-error" style="color: red">&nbsp;</p>
+      <div class="row">
+        <div class="col-xs-2">
+          <input id="color" type="color" style="width: 100%; height: 1.5em; border: 0px;" oninput="cart.set_color(this.value)"></input>
+        </div>
+        <div class="col-xs-4">
+          <div class="btn-group" style="width: 100%">
+            <button class="btn btn-default btn-xs" onclick="autocenter();" style="width:calc(100% - 35px)">Auto Center</button>
+            <button id="auto-center-lock" class="btn btn-default btn-xs" onclick="toggle_auto_center_lock();" style="width:35px;">
+              <i class="fa fa-unlock" id="auto-center-lock-icon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-xs-3">
+          <button class="btn btn-default btn-block btn-xs" onclick="update();">
+            Replot&nbsp;
+            <span class="glyphicon glyphicon-refresh"></span>
+          </button>
+        </div>
+        <div class="col-xs-3">
+          <button class="btn btn-default btn-block btn-xs" onclick="cart.download()">
+            Download&nbsp;
+            <span class="glyphicon glyphicon-download-alt"></span>
+          </button>
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-xs-6">
+          <div class="input-group">
+            <span class="input-group-addon">Points to Plot</span>
+            <input id="points" type="text" class="form-control" onchange="fractal.set_max_number_of_points(this.value); fractal.plot();" value="10000"/>
+          </div>
+        </div>
+        <div class="col-xs-6">
+          <div class="input-group">
+            <span class="input-group-addon">Zoom</span>
+            <input type="text" class="form-control" onchange="set_auto_center_lock(false); cart.zoom_to(this.value);" id="zoom" value="50"/>
+          </div>
+        </div>
+      </div>
+      <br>
+      <!-- <div class="row">
+        <div class="col-xs-6">
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button class="btn btn-default" onclick="document.getElementById('box-dimension').value = fractal.calculate_box_dimension();">Box Dim.</button>
+            </span>
+            <input id="box-dimension" class="form-control" readonly/>
+          </div>
+        </div>
+        <div class="col-xs-6">
+          <div class="input-group">
+            <span class="input-group-btn">
+              <button class="btn btn-default" onclick="document.getElementById('analytic-dimension').value = fractal.calculate_analytic_dimension(5);">Analytic Dim.</button>
+            </span>
+            <input id="analytic-dimension" class="form-control" readonly/>
+          </div>
+        </div>
+      </div> -->
+      <h3 style="margin-top: 60px;">
+        Generator
+        <a class="info-circ" data-toggle="modal" data-target="#generator-modal" href="#generator-modal">
+          <span class="glyphicon glyphicon-info-sign"></span>
+        </a>
+      </h3>
+      <div id="generator-modal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">The Generator</h4>
+            </div>
+            <div class="modal-body">
+              <p>The "generator" image pane shows the effect of each of the transformations on the unit square constructed with the standard unit vectors $(0,1)$ and $(1,0)$. To show orientation, each square also has an "L" shape connected to the bottom left corner.</p>
+              <p>The color of each transformes square corresponds to the color show in the "Raw Transformations" pane. The unshaded grey square shows the un-transformed unit square.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <canvas width="750" height="750" id="generator"></canvas>
+
+
+    </div>
+  </div>
+  <br><br><bR><br><br>
+
+</div>
+
+<!-- classes -->
+<script src="/static/js/Cartesian.js"></script>
+<script src="/static/js/VariableGroup.js"></script>
+<script src="/static/js/Fractal.js"></script>
+<script src="/static/js/TWRow.js"></script>
+<script src="/static/js/GeneratorPane.js"></script>
+
+<!-- auxilliary -->
+<script src="/static/js/transformations.js"></script>
+<script src="/static/js/letter_transformations.js"></script>
+<script src="/static/js/factor_transformation.js"></script>
+<script src="/static/js/helper.js"></script>
+<script src="/static/js/example_fractal_info.js"></script>
+
+
+
+<script>
+
+    var canvas = document.getElementById('fractal');
+    canvas.width = 1000;
+    canvas.height = 1000;
+    var cart = new Cartesian(canvas);
+    cart.on_zoom_change = function () {
+      document.getElementById('zoom').value = cart.zoom;
+    };
+
+
+    // create variable group
+    var variable_group = new VariableGroup(document.getElementById('variable-row-container'));
+
+    // create transformation-weight row group
+    var tw_row_group = new TWRowGroup(document.getElementById('TW-container'), variable_group, color_function);
+
+    // create generatorPane
+    var generator_pane = new GeneratorPane(document.getElementById('generator'), color_function);
+
+    // create fractal object
+    var fractal;
+
+
+    // create fractal error catch
+    function report_error(msg) {
+      // document.getElementById('save-button').style.display = "none";
+      document.getElementById('save-button').disabled = true;
+      document.getElementById('fractal-error').innerHTML = '<span class="glyphicon glyphicon-warning-sign"></span> ' + msg;
+      console.log(msg);
+    }
+    function clear_error() {
+      // document.getElementById('save-button').style.display = "inline-block";
+      document.getElementById('save-button').disabled = document.getElementById('title').value == "";
+      document.getElementById('fractal-error').innerHTML = '&nbsp';
+    }
+
+
+
+    var auto_center_lock = false;
+
+    function set_auto_center_lock(val) {
+      auto_center_lock = val;
+      if (auto_center_lock) {
+        autocenter();
+        document.getElementById('auto-center-lock').classList.add("btn-success");
+        document.getElementById('auto-center-lock-icon').classList.add("fa-lock");
+        document.getElementById('auto-center-lock-icon').classList.remove("fa-unlock");
+      } else {
+        document.getElementById('auto-center-lock-icon').classList.remove("fa-lock");
+        document.getElementById('auto-center-lock-icon').classList.add("fa-unlock");
+        document.getElementById('auto-center-lock').classList.remove("btn-success");
+      }
+    }
+
+    function toggle_auto_center_lock() {
+      set_auto_center_lock(!auto_center_lock);
+    }
+
+    function autocenter() {
+      var curr = auto_center_lock;
+      auto_center_lock = true;
+      update();
+      auto_center_lock = curr;
+    }
+
+
+    var auto_distribute_lock = false;
+
+    function set_auto_distribute_lock(val) {
+      auto_distribute_lock = val;
+      if (auto_distribute_lock) {
+        autodistribute();
+        document.getElementById('auto-distribute-lock').classList.add("btn-success");
+        document.getElementById('auto-distribute-lock-icon').classList.add("fa-lock");
+        document.getElementById('auto-distribute-lock-icon').classList.remove("fa-unlock");
+      } else {
+        document.getElementById('auto-distribute-lock-icon').classList.remove("fa-lock");
+        document.getElementById('auto-distribute-lock-icon').classList.add("fa-unlock");
+        document.getElementById('auto-distribute-lock').classList.remove("btn-success");
+      }
+    }
+
+    function toggle_auto_distribute_lock() {
+      set_auto_distribute_lock(!auto_distribute_lock);
+    }
+
+    function autodistribute() {
+      var curr = auto_distribute_lock;
+      auto_distribute_lock = true;
+      update();
+      auto_distribute_lock = curr;
+    }
+
+
+    function equalize_weights() {
+      tw_row_group.equalize_weights();
+      update();
+    }
+
+    function update() {
+      try {
+
+        var tw = tw_row_group.get_TW();
+        fractal.set_TW(tw);
+
+        if (auto_distribute_lock) {
+          tw.weights = get_auto_distribute_weights(tw_row_group.get_matrices(), 0.01);
+          for (var i = 0; i < tw_row_group.all_rows.length; i++) {
+            tw_row_group.all_rows[i].set_weight(tw.weights[i]);
+          }
+          // needs to be set again for the weight
+          fractal.set_TW(tw);
+        }
+
+        if (auto_center_lock) {
+          cart.set_with_bounds(fractal.get_bounds(), 0.9);
+        }
+
+
+        fractal.plot();
+
+
+        // update raw transformations list
+        var raw_list = document.getElementById('raw-transformation-list');
+        while (raw_list.firstChild) {
+          raw_list.removeChild(raw_list.firstChild);
+        }
+        const matrices = tw_row_group.get_matrices();
+        const weights = tw_row_group.get_weights();
+        const factorizations = tw_row_group.get_factorizations();
+        const ids = tw_row_group.get_ids();
+        for (var i = 0; i < weights.length; i++) {
+          var tr = document.createElement('tr');
+          // color
+          var color_td = document.createElement('td');
+          color_td.style.backgroundColor = '#' + color_function(ids[i]);
+          tr.appendChild(color_td);
+          // matrix
+          var matrix_td = document.createElement('td');
+          var matrix_div = document.createElement('div');
+          var matrix_table = document.createElement('table');
+          matrix_div.classList.add('paren');
+          matrix_table.classList.add('matrix');
+          matrix_table.classList.add('table');
+          for (var j = 0; j < 3; j++) {
+            var matrix_row = document.createElement('tr');
+            for (var k = 0; k < 3; k++) {
+              matrix_data = document.createElement('td');
+              matrix_data.appendChild(document.createTextNode(round(matrices[i][j][k], 3)));
+              matrix_row.appendChild(matrix_data);
+            }
+            matrix_table.appendChild(matrix_row);
+          }
+          matrix_div.appendChild(matrix_table);
+          matrix_td.appendChild(matrix_div);
+          tr.appendChild(matrix_td);
+          // weight
+          var weight_td = document.createElement('td');
+          weight_td.appendChild(document.createTextNode(round(weights[i],3)));
+          tr.appendChild(weight_td);
+          // factorization
+          var factorization_td = document.createElement('td');
+          var func_string = ""; // for use button
+          for (var j in factorizations[i]) {
+            let num = String(round(factorizations[i][j].args, 5));
+            var text = factorizations[i][j].name + "(";
+            if (factorizations[i][j].name == "Rotate") {
+              if (num != "1") {
+                text = text + num + ' ';
+              }
+              text = text + "π";
+            } else {
+              text = text + num;
+            }
+            text = text + ")";
+            func_string = func_string + text;
+            factorization_td.appendChild(document.createTextNode(text));
+            factorization_td.appendChild(document.createElement('br'));
+          }
+          tr.appendChild(factorization_td);
+          // use factorization
+          var use_td = document.createElement('td');
+          var button = document.createElement('button');
+          button.classList.add('btn');
+          button.classList.add('btn-default');
+          var icon = document.createElement('span');
+          icon.classList.add('glyphicon');
+          icon.classList.add('glyphicon-circle-arrow-up');
+          button.appendChild(icon);
+          const this_i = i;
+          const this_f_s = func_string.replace('π','pi');
+          button.onclick = function() {
+            tw_row_group.all_rows[this_i].guppy.engine.import_text(this_f_s);
+            tw_row_group.all_rows[this_i].guppy.engine.end();
+            tw_row_group.all_rows[this_i].guppy.render(true);
+          }
+          use_td.appendChild(button);
+          tr.appendChild(use_td);
+          //
+          raw_list.appendChild(tr);
+        }
+
+        // update the generator
+        generator_pane.update(tw, ids);
+
+
+        clear_error();
+      } catch (e) {
+        report_error(e);
+      }
+    }
+
+
+    function export_info_to_module() {
+      // export matrices
+      var matrices = tw_row_group.get_matrices();
+      document.getElementById('export-matrices').innerHTML = "";
+      for (var i in matrices) {
+        var m = round(matrices[i], 5);
+        document.getElementById('export-matrices').innerHTML += JSON.stringify(m) + "\n";
+      }
+
+      // info JSON
+      document.getElementById('info-json').innerHTML = JSON.stringify(get_info());
+
+    }
+
+
+    function set_fractal(f_info) {
+
+      // place title
+      document.getElementById('title').value = f_info.title;
+      document.getElementById('save-button').disabled = f_info.title != "";
+
+      // clear current rows
+      tw_row_group.delete_all();
+
+      for (var i = 0; i < f_info.transformations.length; i++) {
+        // transformations
+        tw_row_group.add_row();
+        tw_row_group.all_rows[i].guppy.import_text(f_info.transformations[i]);
+        tw_row_group.all_rows[i].guppy.engine.end();
+        tw_row_group.all_rows[i].guppy.render(true);
+        // weights
+        if (f_info.weights == 'auto') {
+          tw_row_group.all_rows[i].weight.value = 1;
+        } else {
+          tw_row_group.all_rows[i].weight.value = f_info.weights[i];
+        }
+      }
+
+      // if auto weights, set
+      if (f_info.weights == 'auto') {
+        set_auto_distribute_lock(true);
+      }
+
+
+
+      for (var var_name in f_info.vars) {
+        var v = variable_group.add_variable(var_name);
+        v.set_min(f_info.vars[var_name].min);
+        v.set_max(f_info.vars[var_name].max);
+        v.set_value(f_info.vars[var_name].val);
+        v.set_step(f_info.vars[var_name].step);0
+      }
+
+      // fractal = new Fractal(cart, );
+
+      try {
+        fractal = new Fractal(cart, tw_row_group.get_TW()); // (the actual function objects and weight numbers need to be generated)
+        clear_error();
+      } catch(e) {
+        fractal = new Fractal(cart, {
+          transformations: [Scale(0.5), Scale(0.5)],
+          weights: [1,1]
+        })
+        report_error(e);
+      }
+
+      // once the fractal is all set, then we can set it to update on change
+      variable_group.onchange = update;
+      tw_row_group.onchange = update;
+
+      cart.center_at(f_info.center);
+
+      if (f_info.zoom == 'auto') {
+        set_auto_center_lock(true);
+      } else {
+        cart.zoom_to(f_info.zoom);
+      }
+
+      document.getElementById('points').value = f_info.points;
+      fractal.set_max_number_of_points(f_info.points);
+
+      document.getElementById('color').value = f_info.color;
+      cart.set_color(f_info.color);
+
+      update();
+    }
+
+
+    function get_info() {
+      // {title, transformations, weights, vars, zoom, center, points, color}
+      var info = {};
+
+      // title
+      info.title = document.getElementById('title').value;
+
+      // transformations
+      info.transformations = '';
+      const text = tw_row_group.get_all_content('text');
+      for (var i in text) {
+        info.transformations = info.transformations + text[i] + "&";
+      }
+      info.transformations = info.transformations.substring(0, info.transformations.length - 1)
+
+      // weights
+      info.weights = JSON.stringify(tw_row_group.get_all_weight_text());
+      if (auto_distribute_lock) {
+        info.weights = "'auto'";
+      }
+
+      // vars
+      info.vars = JSON.stringify(variable_group.get_values_and_bounds());
+
+      // zoom
+      info.zoom = auto_center_lock ? 'auto' : String(cart.zoom);
+
+      // center
+      info.center = JSON.stringify(cart.center);
+
+      // points
+      info.points = String(document.getElementById('points').value);
+
+      // color
+      info.color = String(document.getElementById('color').value);
+
+      return info;
+    }
+
+
+    function save() {
+      $.ajax({
+        url: '/save_playground',
+        data: get_info(),
+        type: 'POST',
+        cache: false,
+        success: function(response){
+          if (response.success == 'true') {
+            var curr = window.location.href;
+            var link = curr.substring(0,curr.indexOf('/')) + '/playground/' + response.id;
+            window.location = link;
+          } else {
+            console.log('saving error');
+          }
+        },
+        error: function(error){
+          console.log(error);
+        },
+      });
+
+    }
+
+
+
+
+    function import_matrices() {
+      try {
+        var text = document.getElementById('import-matrices-lines').value.trim().replaceAll('\n',',');
+        var lines = eval("[" + text + "]");
+
+        // clear current rows
+        tw_row_group.delete_all();
+
+        for (var i = 0; i < lines.length; i++) {
+          tw_row_group.add_row();
+          tw_row_group.all_rows[i].guppy.import_text(
+            "M(" +
+            lines[i][0][0] + "," +
+            lines[i][0][1] + "," +
+            lines[i][1][0] + "," +
+            lines[i][1][1] + "," +
+            lines[i][0][2] + "," +
+            lines[i][1][2] + ")"
+          );
+          tw_row_group.all_rows[i].guppy.engine.end();
+          tw_row_group.all_rows[i].guppy.render(true);
+          tw_row_group.all_rows[i].set_weight(1);
+        }
+        autocenter();
+        update();
+        $('#import-modal').modal('hide')
+      } catch(e) {
+        document.getElementById('import-error').innerHTML = e;
+      }
+    }
+
+
+    // set default fractal
+    var DEFAULT = {
+      title: "", //{{playground.title|tojson}},
+      transformations: {{playground.transformations|tojson}}.split('&'),
+      weights: {{playground.weights|tojson}},
+      vars: {{playground.vars|tojson}},
+      zoom: {{playground.zoom|tojson}},
+      center: {{playground.center|tojson}},
+      points: Number({{playground.points}}),
+      color: {{playground.color|tojson}}
+    };
+
+
+    set_fractal(DEFAULT);
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

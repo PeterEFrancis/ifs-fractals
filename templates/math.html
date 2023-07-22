@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>IFS Fractals</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="static/img/leaf.gif" type="image/gif">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- MathJax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+
+    <!-- HTMLTeX -->
+    <script src="https://PeterEFrancis.com/HTMLTeX/HTMLTeX.js"></script>
+    <link rel="stylesheet" href="https://PeterEFrancis.com/HTMLTeX/HTMLTeX.css">
+
+    <style>
+      body {
+        min-width: 250px;
+      }
+
+      .navbar {
+        margin-bottom: 0;
+        border-radius: 0;
+      }
+
+      br {
+        user-select: none;
+      }
+
+      div {
+        overflow: scroll;
+      }
+    </style>
+
+  </head>
+  <body>
+
+{{navbar|safe}}
+
+  <div class="container" style="margin-bottom: 100px;">
+    <div class="row">
+      <div class="col-md-12" id="LaTeX" spellcheck="false" contenteditable="false" style="text-align: justify;">
+        <div hidden>
+        \(
+          \newcommand{\R}{\mathbb{R}}
+          \newcommand{\N}{\mathbb{N}}
+          \newcommand{\Translate}{\operatorname{Translate}}
+          \newcommand{\Rotate}{\operatorname{Rotate}}
+          \newcommand{\Scale}{\operatorname{Scale}}
+          \newcommand{\XYScale}{\operatorname{XYScale}}
+          \newcommand{\YScale}{\operatorname{YScale}}
+          \newcommand{\XShear}{\operatorname{XShear}}
+          \newcommand{\YShear}{\operatorname{YShear}}
+          \newcommand{\m}[4]{\begin{pmatrix}#1 & #2 \\ #3 & #4\end{pmatrix}}
+          \newcommand{\K}{\mathcal{K}}
+          \newcommand{\C}{\mathcal{C}}
+          \newcommand{\T}{\mathcal{T}}
+          \newcommand{\e}{\varepsilon}
+          \newcommand{\diam}{\operatorname{diam}}
+          \newcommand{\Trace}{\operatorname{Trace}}
+          \renewcommand{\mid}{\ : \ }
+          \newcommand{\dim}{\operatorname{dim}}
+          \newcommand{\Ord}{\operatorname{Ord}}
+          \newcommand{\Ref}{\operatorname{Ref}}
+          \newcommand{\O}{\mathcal{O}}
+        \)
+        </div>
+
+        <h1 style="text-align: center; margin-top: 60px;">The Beautiful Mathematics of IFS Fractals</h1>
+        <br style="height: 30px">
+        <em style="display: block; text-align: center">Peter E. Francis</em>
+        <br>
+        <center>Department of Mathematics, Gettysburg College</center>
+        <center>Gettysburg, PA 17325-1486 USA</center>
+        <!-- <center>E-mails: franpe02@gettysburg.edu</center> -->
+
+        <center>May 14, 2021</center>
+        <br style="height: 30px">
+
+
+        <abstract>
+        Just a few random numbers and 2-by-2 matrices can be used in unison to create spectacularly beautiful images of planar fractals. These iterated function systems (IFS) are easy to understand, but lead to deep constructions, connecting the vast areas of research on the fringe between topology and geometry.
+        We will prove the existence of IFS fractals and present a new way to represent transformations that can be used to define them. This paper will also compare two algorithms for IFS fractal generation (iterative mapping vs. the chaos game) and prove that they are probabilistically equivalent. By doing this we'll explain aspects of the online <a href="/playground" class="highlight">playground</a> interface. Finally, we'll compare various formulations of dimension, both fractal and topological, and see how they relate to the cases of planar IFS fractals.
+        </abstract>
+
+        <hr>
+        <tableofcontents></tableofcontents>
+        <hr>
+
+
+
+        <section id="intro">Introduction</section>
+
+        Although the word <strong>fractal</strong> can have various meanings in different contexts, the fractals that we are concerned with are fixed points of linear contraction mappings on compact subsets of the plane, and are decidedly self-similar. Mandelbrot gave a more general definition in <cite to="mandelbrot"></cite>:
+        <definition id="fractal">
+          A <em>fractal</em> is a set whose Hausdorff–Besicovitch dimension is strictly greater than its topological dimension.
+        </definition>
+
+
+        The concept of dimension is a complicated one, and relies on topological concepts that we won't fully discuss. We will defer a deeper investigation into dimension (and thus Mandelbrot's definition), and start instead with a discussion of our iterated function system fractals.
+
+
+        Motivated by the desire to randomly generate fractals from the full sample space of possible transformations, we fully classify the affine linear transformations that can determine them with a particular functional decomposition. We will also discuss the computational ways that fractal images are generated on this site.
+
+
+        <section>Existence of an IFS Fractal</section>
+        In order to understand the type of fractal we are interested in, we must first build up to an existence theorem.</p>
+        Let $X$ be a metric space with metric $d.$
+        <definition id="contraction-mapping">
+          A function $f: X\to X$ is a <em>contraction mapping</em> if there is some $c\in(0,1)$ such that for all $x_1,x_2\in X$, $$d(f(x_1), f(x_2))\leq cd(x_1, x_2).$$ The number $c$ is called the <em>contraction constant</em> of $f.$
+        </definition>
+        The following theorem is a common result in an introductory analysis course. Its proof is presented in <cite to="BBK"></cite>
+        <theorem id="contraction-mapping-principle" title="The contraction mapping principle">
+          Suppose that $X$ is a complete metric space with metric $d$ and that $f:X\to X$ is a contraction mapping. Then
+          <ul>
+            <li>$f$ has a unique fixed point: there is a single $p\in X$ such that $f(p)=p$;</li>
+            <li>given any $q\in X$, the sequence $(x_n)$ defined by $x_0=q$ and $x_{n}=f(x_{n-1})$ for $n>0$ converges to $p.$</li>
+          </ul>
+        </theorem>
+        In order to use apply this principle to iterated function systems, we have to discuss the metric space $\K$, the set of nonempty compact subsets of $\R^2.$ The metric on this space is called the Hausdorff Metric, which first requires the following definition.
+        <definition id="r-collar">
+          Given $U\subseteq \R^2$ and $r>0$, we define the <em>$r$-collar</em> of $U$ to be the set $$U_r=\{x\in\R^2\mid |x-u|\leq r\text{ for some $u\in U$}\}.$$
+        </definition>
+        Intuitively, the name "collar" should invoke a sense that $U_r$ is the result of expanding the borders of $U$ by a distance $r.$
+        <definition id="hausdorff-metric">
+          We define the <em>Hausdorff Metric</em> on $\K$ by $$h(U,V)=\min\{r\geq 0 \mid U\subseteq V_r\text{ and } V\subseteq U_r\}.$$
+        </definition>
+        In other words, the Hausdorff "distance" between two sets is the smallest amount one needs to expand either so each resulting collar contains the other. This minimum quantity is always defined when $U$ and $V$ are compact subsets of $\R^2$, and $h$ is indeed a metric (this result and the next Theorem are proven in <cite to="BBK"></cite>).
+        <theorem>
+          Equipped with the Hausdorff Metric, $\K$ is complete.
+        </theorem>
+        Now that we have a complete metric space, we can define the transformations used in an IFS.
+        <definition id="hutchinson-operator">
+          Suppose that we have an iterated function system of contraction mappings $f_1, f_2, \dots, f_k:\R^2\to \R^2$. Then the function
+          \begin{align*}
+            F : \K & \to \K \\
+                 U & \mapsto f_1(U)\cup f_2(U)\cup \dots \cup f_k(U)
+          \end{align*}
+          is called a <em>Hutchinson Operator</em>.
+        </definition>
+        <theorem>
+          Any Hutchinson operator $F:\K\to\K$ is a contraction mapping on $\K$ with respect to the Hausdorff metric.
+        </theorem>
+        <proof collapse="true" open="false">
+          (Adapted from <cite to="BBK"></cite>). Let $c_1, \dots, c_k$ be the contraction constants of the contractions $f_1, \dots, f_k:\R^2\to\R^2.$ We will show that $F$ has contraction constant $c=\max\{c_1,\dots, c_k\}.$
+
+
+          Take any $U,V\in\K$, write $r=h(U,V)$, and choose any point $x\in F(U).$ Then there exists some $j\in\{1,\dots,k\}$ and some $u\in U$ for which $x=f_j(u)$, so by the definition of the Hausdorff metric, there is some $v\in V$ for which $|u-v|\leq r.$ Since $f_j$ is a contraction, we have
+          $$|x - f_j(v)| = |f_j(u) - f_j(v)|\leq c_j|u-v|\leq cr.$$
+          Clearly, $f_j(v)\in F(V)$, so the inequality above shows that any point of $F(U)$ is within $cr$ of some point of $F(V)$:
+
+          $$F(U)\subseteq F(V)_{cr}.$$
+          It can be symmetrically established that $$F(V)\subseteq F(U)_{cr}.$$ Therefore,
+          $$h(F(U),F(V))\leq cr = c\cdot h(U,V);$$
+          $F$ is a contraction mapping.
+        </proof>
+
+        Now Theorem <ref to="contraction-mapping-principle"></ref> tells us that any Hutchinson operator has a unique fixed point in $\K.$ These fixed points (compact sets in $\R^2$) are the fractals that we will be studying. Specifically, the Hutchinson operators that we will focus our attention to are built using Affine Linear Transformations of $\R^2.$
+
+
+        Note that the phrase "Iterated Function System" now makes sense: the contraction mapping principle tells us that with hutchinson operator $F$, and any $U\in\K$, the iterative sequence $$U,\ F(U),\ F(F(U)),\ F(F(F(U))),\ \dots$$ converges to a unique fixed point $S\in\K$, where $F(S)=S.$
+
+
+
+        <section>Affine Linear Transformations in the Plane</section>
+        In this section we will discuss affine linear transformations from the plane $\R^2$ to itself. These mappings can be represented by matrix multiplication and vector addition: consider the mapping
+          \begin{align*}
+            f: \R^2 & \to \R^2 \\
+                  v & \mapsto Av+b
+          \end{align*}
+        where $A$ is a two-by-two real-valued matrix and $b$ is a vector in $\R^2.$ Alone, multiplication by $A$ is a linear transformation, and with the addition of non-zero $b$, $f$ is affine. We can identify the the plane $\R^2$ with the plane $\R^2\times\{1\}\subseteq \R^3$, and so define these transformations with a single matrix.  The block matrix $$\begin{pmatrix}A & b \\ 0 & 1\end{pmatrix}$$ defines a linear transformation that maps
+        $$\begin{bmatrix}v\\ 1\end{bmatrix}\mapsto \begin{bmatrix}f(v)\\ 1\end{bmatrix}.$$
+        Compositions of affine linear transformations can therefore be seen as products of these $3\times 3$ matrices. Since every affine linear transformation uniquely corresponds to a $3\times 3$ matrix, we will interchangeably refer to the function and its $3\times 3$ standard matrix as the same object.
+
+
+        There are some "basic" matrices whose actions are naturally understood geometrically. To start, since we already know that $b$ is a translation vector, we can write $\text{Translate}(h,k)$ for the function with standard matrix $$\begin{pmatrix} 1 & 0 & h \\ 0 & 1 & k \\ 0 & 0 & 1 \end{pmatrix};$$ the function that maps
+        $$\begin{bmatrix}x \\ y\\ 1\end{bmatrix}\mapsto \begin{bmatrix}x+h \\ y+k\\ 1\end{bmatrix}.$$
+        We can narrow our focus to the action made by $A.$ The following table shows the $A$ matrices for our basic transformations.
+
+
+        <table class="table-bordered" id="basic-transformations" caption="Basic Transformations">
+         <thead>
+           <tr>
+             <th>Function</th>
+             <th>Matrix $A$</th>
+             <th>Mapping</th>
+             <th>Action</th>
+           </tr>
+         <thead>
+         <tbody>
+           <tr>
+             <td>$\Scale(s)$</td>
+             <td>$\begin{pmatrix} s & 0\\ 0 & s \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}sx\\ sy\end{bmatrix}$</td>
+             <td>Scale a vector by $s$ in the $x$ and $y$ directions.</td>
+           </tr>
+           <tr>
+             <td>$\XYScale(s, t)$</td>
+             <td>$\begin{pmatrix} s & 0\\ 0 & t \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}sx\\ ty\end{bmatrix}$</td>
+             <td>Scale a vector by $s$ in the $x$ direction and by $t$ in the $y$ direction.</td>
+           </tr>
+           <tr>
+             <td>$\Rotate(\theta)$</td>
+             <td>$\begin{pmatrix} \cos\theta & -\sin\theta\\ \sin\theta & \cos\theta \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}x\cos\theta-y\sin\theta\\ x\sin\theta+y\cos\theta\end{bmatrix}$</td>
+             <td>Rotate a vector by $\theta$ radians, counter-clockwise around the origin.</td>
+           </tr>
+           <tr>
+             <td>$\XShear(t)$</td>
+             <td>$\begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}x+ty\\ y\end{bmatrix}$</td>
+             <td>Shear a vector in the $x$ direction with a shear parameter $t.$</td>
+           </tr>
+           <tr>
+             <td>$\YShear(t)$</td>
+             <td>$\begin{pmatrix} 1 & 0 \\ t & 1 \end{pmatrix}$</td>
+             <td>$\begin{bmatrix}x\\ y\end{bmatrix}\mapsto \begin{bmatrix}x\\ tx+y\end{bmatrix}$</td>
+             <td>Shear a vector in the $y$ direction with a shear parameter $t.$</td>
+           </tr>
+         </tbody>
+        </table>
+
+        Now we can ask the question: how can we tell when an affine linear transformation is a contraction mapping?
+
+        <theorem id="operator-norm">
+          A $2\times 2$ matrix $A$ is a contraction if and only if the largest eigenvalue $\lambda_1$ of $A^TA$ is less than 1. In this case, $A$ has contraction constant $\sqrt{\lambda_1}.$
+        </theorem>
+        <proof collapse="true" open="false">
+          (From <cite to="keir"></cite>) A $2\times 2$ matrix is a contraction if and only if there is some $0\leq k < 1$ such that, for all $x,y\in\R^2$, $$|Ax-Ay|\leq k|x-y|;$$
+          equivalently, for all nonzero $v\in\R^2$,
+          $$|Av|\leq k|v|.$$
+          We can now see that $A$ is a contraction exactly when $$|Au|\leq k$$ for all unit vectors $u.$ Since the quantity $|Au|$ is a continuous function of $u$ and $S^1$ is a compact subset of $\R^2$, the maximum value of $|Au|$ exists and is called the <em>operator norm</em> of $A$, denoted $M_A.$ Certainly, if $M_A < 1$, $A$ is a contraction mapping with contraction constant $M_A$, and if $M_A\geq 1$, $A$ is not a contraction mapping. Now we will compute $M_A.$
+
+
+          Since $A^TA$ is a symmetric real matrix, it has real eigenvalues $\lambda_1\geq \lambda_2$ and is orthogonally diagonalizable:
+          $$A^TA = PDP^{-1},$$
+          where $D$ is the diagonal matrix $$\m{\lambda_1}{0}{0}{\lambda_2}$$ and $P=\begin{pmatrix}v_1 & v_2\end{pmatrix}$ is an orthogonal matrix whose columns are eigenvectors. Therefore, $P^{-1}=P^T$, so if we let $x=P^Tu$, we get
+          \begin{align*}
+            |A u|^{2} & = (A u) \cdot(A u) \\
+                      & = (A u)^{T}(A u) \\
+                      & = u^{T}\left(A^{T} A\right)u \\
+                      & = u^{T}PDP^{-1}u \\
+                      & = u^{T}PDP^Tu \\
+                      & = (u^{T}P)D(P^Tu) \\
+                      & = x^TDx \\
+                      & = x_1^2\lambda_1 + x_2^2\lambda_2.
+          \end{align*}
+          Since $P^T$ is an orthogonal matrix, it preserves the length of vectors, so $M_A^2$ is the maximum value of the expression $$x_1^2\lambda_1 + x_2^2\lambda_2$$ over all unit vectors $x=(x_1,x_2).$ Note further that $|Au|^2$ is non-negative, so we must have $\lambda_1\geq\lambda_2\geq 0.$ The quantity $x_1^2\lambda_1 + x_2^2\lambda_2$ is maximized when $x_1=1$ and $x_2=0.$ This proves that $$M_A = \sqrt{\lambda_1}.$$
+          Therefore, $A$ is a contraction mapping if and only if $\sqrt{\lambda_1} = M_A < 1$, if and only if $\lambda_1 < 1.$
+        </proof>
+
+
+
+        <section>Transformation Decomposition</section>
+
+        One question that can be asked is, given a transformation matrix
+        $$T=\begin{pmatrix}A & b \\ 0 & 1\end{pmatrix},$$
+        how can we understand the action of $A$? (Since we know that $b$ is a translation vector). It turns out that we can make sense of $T$ using only the basic transformations listed in Table <ref to="basic-transformations"></ref>. In the theorem below, we use the following notation: $\arg v$ is the angle $v$ makes with the positive $x$-axis, in the counter clockwise direction, with $\arg v \in [0,2\pi)$.
+        <theorem id="factorizations" title="Factorization of linear transformations">
+          Any linear transformation can be written as the composition of a rotation, shearing, and scaling. In particular, if $A=\begin{pmatrix}A_1 & A_2\end{pmatrix}$ is invertible, then
+          $$A=\Rotate\left(\arg A_1\right)\ \XShear\left(\frac{A_1\cdot A_2}{\det A}\right)\ \XYScale\left(|A_1|, \frac{\det A}{|A_1|}\right).$$
+          If $A$ is not invertible and $A_1\neq 0$, then
+          $$A=\Rotate(\arg A_1)\ \XYScale(|A_1|,0)\ \XShear\left(\frac{|A_2|}{|A_1|}\right).$$
+          If $A_1=0$ and $A_2\neq 0$, then
+          $$A=\Rotate\left(\frac{\pi}{2}-\arg A_2\right)\ \XYScale(0,|A_2|);$$
+          otherwise, $A=\Scale(0).$
+        </theorem>
+        <proof collapse="true" open="false">
+          In the first case, recognize that $\cos(\arg A_1)=\frac{A_{11}}{|A_1|}$ and $\sin(\arg A_1)=\frac{A_{12}}{|A_1|}$, so $$\Rotate(\arg A_1)=\frac{1}{|A_1|}\m{A_{11}}{-A_{12}}{A_{12}}{A_{11}}.$$
+          Then
+          \begin{align*}
+            & \  \Rotate\left(\arg A_1\right)\
+            \XShear\left(\frac{A_1\cdot A_2}{\det A}\right)\
+            \XYScale\left(|A_1|, \frac{\det A}{|A_1|}\right) \\
+            = & \ \frac{1}{|A_1|}
+          \m{A_{11}}{-A_{12}}{A_{12}}{A_{11}}
+          \m{1}{\frac{A_1\cdot A_2}{\det A}}{0}{1}
+          \m{|A_1|}{0}{0}{\frac{\det A}{|A_1|}} \\
+            = & \ \frac{1}{|A_1|}
+          \m{A_{11}}{A_{11}\frac{A_1\cdot A_2}{\det A}-A_{12}}{A_{12}}{A_{12}\frac{A_1\cdot A_2}{\det A}+A_{11}}
+          \m{|A_1|}{0}{0}{\frac{\det A}{|A_1|}}\\
+            = & \ \m{A_{11}}{A_{11}\frac{A_1\cdot A_2}{\det A}-A_{12}}{A_{12}}{A_{12}\frac{A_1\cdot A_2}{\det A}+A_{11}}
+          \m{1}{0}{0}{\frac{\det A}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\left(A_{11}\frac{A_1\cdot A_2}{\det A}-A_{12}\right)\frac{\det A}{|A_1|^2}}{A_{12}}{\left(A_{12}\frac{A_1\cdot A_2}{\det A}+A_{11}\right)\frac{\det A}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\frac{A_{11}(A_1\cdot A_2) - A_{12}\det A}{|A_1|^2}}{A_{12}}{\frac{A_{12}(A_1\cdot A_2) + A_{11}\det A}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\frac{A_{11}(A_{11}A_{21} + A_{12}A_{22}) - A_{12}(A_{11}A_{22} - A_{21}A_{12})}{|A_1|^2}}{A_{12}}{\frac{A_{12}(A_{11}A_{21} + A_{12}A_{22}) + A_{11}(A_{11}A_{22} - A_{21}A_{12})}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{\frac{A_{21}(A_{11}^2+A_{12}^2)}{|A_1|^2}}{A_{12}}{\frac{A_{22}(A_{11}^2+A_{12}^2)}{|A_1|^2}}\\
+            = & \ \m{A_{11}}{A_{21}}{A_{12}}{A_{22}}\\
+            = & \ A.
+          \end{align*}
+
+          In the second case, suppose that $A_1\neq 0$, so $A_2=\frac{|A_2|}{|A_1|}A_1.$ Then,
+          \begin{align*}
+              & \ \Rotate(\arg A_1)\ \XYScale(|A_1|,0)\ \XShear\left(\frac{|A_2|}{|A_1|}\right) \\
+            = & \ \frac{1}{|A_1|}\m{A_{11}}{-A_{12}}{A_{12}}{A_{11}} \m{|A_1|}{0}{0}{0} \m{1}{\frac{|A_2|}{|A_1|}}{0}{1}\\
+            = & \ \m{A_{11}}{-A_{12}}{A_{12}}{A_{11}} \m{1}{0}{0}{0} \m{1}{\frac{|A_2|}{|A_1|}}{0}{1}\\
+            = & \ \m{A_{11}}{0}{A_{12}}{0} \m{1}{\frac{|A_2|}{|A_1|}}{0}{1}\\
+            = & \ \m{A_{11}}{\frac{|A_2|}{|A_1|}A_{11}}{A_{12}}{\frac{|A_2|}{|A_1|}A_{12}}\\
+            = & \ \begin{pmatrix}A_1 & \frac{|A_2|}{|A_1|}A_1\end{pmatrix}\\
+            = & \ \begin{pmatrix}A_1 & A_2\end{pmatrix}\\
+            = & \ A.
+          \end{align*}
+
+          In the third case, suppose that $A_1=0.$ If $A_2=0$, is is clear that
+          $$A=\m{0}{0}{0}{0} = \Scale(0).$$
+          Otherwise, $A_2\neq 0$, so
+          \begin{align*}
+              & \ \Rotate\left(\arg A_2 - \frac{\pi}{2}\right)\ \XYScale(0, |A_2|) \\
+            = & \ \m{\cos\left(\arg A_2 - \frac{\pi}{2}\right)}{-\sin\left(\arg A_2 - \frac{\pi}{2}\right)}{\sin\left(\arg A_2 - \frac{\pi}{2}\right)}{\cos\left(\arg A_2 - \frac{\pi}{2}\right)} \m{0}{0}{0}{|A_2|}\\
+            = & \ \m{\sin\left(\arg A_2\right)}{\cos\left(\arg A_2\right)}{-\cos\left(\arg A_2\right)}{\sin\left(\arg A_2\right)} \m{0}{0}{0}{|A_2|}\\
+            = & \ \frac{1}{|A_2|}\m{A_{22}}{A_{21}}{-A_{21}}{A_{22}} \m{0}{0}{0}{|A_2|}\\
+            = & \ \m{A_{22}}{A_{21}}{-A_{21}}{A_{22}} \m{0}{0}{0}{1}\\
+            = & \ \m{0}{A_{21}}{0}{A_{22}}\\
+            = & \ \begin{pmatrix}A_1 & A_2\end{pmatrix}\\
+            = & \ A.
+          \end{align*}
+        </proof>
+
+
+        The next result comes in very handy both conceptually and computationally. We can classify the arguments in the matrix decomposition shown in Theorem <ref to="factorizations"></ref> for invertible matrices that result in contraction mappings. First, a useful lemma:
+
+        <lemma id="eigenvalues-of-a-symmetric-matrix">
+          The largest eigenvalue of a real $2\times 2$ symmetric matrix $$P=\begin{pmatrix}\alpha & \beta \\ \beta & \gamma\end{pmatrix}$$ is less than 1 if and only if $\Trace(P) < \min(2, 1 + \det(P))$.
+        </lemma>
+        <proof collapse="true" open="false">
+          Since $P$ is real and symmetric, it has real eigenvalues. We can find the eigenvalues of $P$ with a characteristic polynomial:
+          \begin{align*}
+                 & 0 = \det(P-\lambda I) \\
+            \iff & 0 = \lambda^2 - (\gamma + \alpha)\lambda + (\alpha\gamma - \beta^2) \\
+            \iff & \lambda = \frac{(\gamma+\alpha)\pm\sqrt{(\gamma+\alpha)^2-4(\alpha\gamma - \beta^2)}}{2} \\
+            \iff & \lambda = \frac{\Trace(P)\pm\sqrt{\Trace(P)^2-4\det(P)}}{2} \\
+          \end{align*}
+          Then the largest eigenvalue of $P$ is $\lambda_1 = \frac{\Trace(P)+\sqrt{\Trace(P)^2-4\det(P)}}{2}$, so
+          \begin{align*}
+            \lambda_1 < 1 \iff & \Trace(P)+\sqrt{\Trace(P)^2-4\det(P)} < 2 \\
+                          \iff & \sqrt{\Trace(P)^2-4\det(P)} < 2 - \Trace(P) \\
+                          \iff & \Trace(P)^2-4\det(P) < (2 - \Trace(P))^2 \quad\text{and}\quad\Trace(P) < 2 \\
+                          \iff & \Trace(P)^2-4\det(P) < 4 - 4\Trace(P) + \Trace(P)^2\quad\text{and}\quad\Trace(P) < 2 \\
+                          \iff & \Trace(P) < \det(P) + 1\quad\text{and}\quad\Trace(P) < 2 \\
+                          \iff & \Trace(P) < \min(2, 1 + \det(P)). \\
+          \end{align*}
+        </proof>
+        <theorem id="contraction-classification">
+          Suppose $A$ is a $2\times 2$ invertible matrix, so $A$ can be written as
+          $$A=\Rotate(\theta)\XShear(w)\XYScale(x,y)$$
+          for some $w,x,y,\theta \in\R$ with $x>0$ and $y\neq 0.$ Then $A$ determines a contraction mapping if and only if $$x^2 < 1, \quad y^2 < 1, \quad\text{and}\quad w^2 < \frac{(1-x^2)(1-y^2)}{y^2}.$$
+        </theorem>
+        <proof collapse="true" open="false">
+          First notice that
+          \begin{align*}
+            A^T & = \XYScale(x,y)^T\XShear(w)^T\Rotate(\theta)^T\\
+                & = \XYScale(x,y)\YShear(w)\Rotate(-\theta),\\
+          \end{align*}
+          so since $\Rotate(-\theta)\Rotate(\theta)=I$, we have that
+          \begin{align*}
+            A^TA & = \XYScale(x,y)\ \YShear(w)\ I\ \XShear(w)\ \XYScale(x,y)\\
+                 & = \m{x}{0}{0}{y}\m{1}{0}{w}{1}\m{1}{w}{0}{1}\m{x}{0}{0}{y} \\
+                 & = \m{x}{0}{0}{y}\m{1}{w}{w}{w^2+1}\m{x}{0}{0}{y} \\
+                 & = \m{x}{wx}{wxy}{y(1+w^2)}\m{x}{0}{0}{y} \\
+                 & = \m{x^2}{wxy}{wxy}{y^2(1+w^2)}. \\
+          \end{align*}
+          By Theorem <ref to="operator-norm"></ref>, $A$ is a contraction if and only if the largest eigenvalue of $A^TA$ is less than 1, which is true by Lemma <ref to="eigenvalues-of-a-symmetric-matrix"></ref> if and only if
+          \begin{align*}
+                 & \Trace(A^TA) < \min(2, 1 + \det(A^TA)) \\
+            \iff & x^2 + y^2(1 + w^2) < \min(2, 1 + x^2y^2(1+w^2) - (wxy)^2) \\
+            \iff & x^2 + y^2 + y^2w^2 < \min(2, 1 + x^2y^2) \\
+            \iff & w^2 < \min\left(\frac{2-(x^2+y^2)}{y^2},\frac{(1-x^2)(1-y^2)}{y^2}\right).
+          \end{align*}
+          From this, we see that $x^2+y^2 < 2$, for if not, $w^2 < 0$. Furthermore, if we suppose indirectly that $y^2 \geq 1$, then $x^2 < 1$ (since $x^2+y^2 < 2$) implying that $w^2 < 0$ because $w^2<\frac{(1-x^2)(1-y^2)}{y^2}$. Hence $y^2 < 1$, and similarly, $x^2 < 1$. Thus with these restrictions,
+          $$\frac{2-(x^2+y^2)}{y^2} > \frac{1+x^2y^2-(x^2+y^2)}{y^2} = \frac{(1-x^2)(1-y^2)}{y^2},$$
+          so
+          $$w^2 < \frac{(1-x^2)(1-y^2)}{y^2}.$$
+
+
+        </proof>
+
+        If we let $\C$ denote the set of invertible and affine linear contraction mappings on $\R^2$, $\T=\R^2 \times [0,2\pi) \times E$, and write
+        $$E = \{(w,x,y)\in \R\times(0,1)\times((-1,0)\cup(0,1)) \mid w^2y^2 < (1-x^2)(1-y^2)\},$$
+        then Theorem <ref to="contraction-classification"></ref> implies that the function
+        $$\Phi : \T\to \C$$
+        that maps the 6-tuple of real numbers $(h,k,\theta, w, x, y)\in \T$ to the transformation $$\Translate(h,k)\ \Rotate(\theta)\ \XShear(w)\ \XYScale(x,y)$$
+        is a surjection.
+        <theorem id="path-connected-space">
+          The set $\T$ has exactly two path connected components.
+        </theorem>
+        <proof collapse="true" open="false">
+          The set $\R^2\times [0,2\pi)$ is clearly is path connected, so to prove our theorem we just must show that $E$ has exaclty two path connected components.
+          It is easy to see that given any point $(a,b,c)\in E$, There is a strightline path $\alpha: [0,a]\to E$, given by $\alpha(t)=(t,b,c)$, from $(a,b,c)$ to $(0,b,c)$ since for any $t\in [0,a]$
+          $$t^2 \leq a^2 < \frac{(1-b^2)(1-c^2)}{c^2}.$$
+          In other words, there is a path from any point in $E$, to the subset of $E$
+          $$\{(0,b,c)\in E\} = \{0\}\times(0,1)\times ((-1,0)\cup(0,1)),$$
+          which itself has exaclty two path connected components.
+        </proof>
+        There is clearly some notion of "symmetry" at work here. Let $E^+=E\cap \{y > 0\}$ and $E^-=E\cap\{y < 0\}$. Note that $E$ is this disjoint union of $E^+$ and $E^-$. The proof above shows that $E^-$ and $E^+$ are the path connected components of $E$. In fact, $E^+$ is homeomorphic to $E^-$ via the map $(w,x,y)\mapsto(w,x,-y)$, and $\Phi$ keeps the image of these two sets disjoint: $\C^+ = \Phi(\R^2 \times [0,2\pi)\times E^+)$ and $\C^- =\Phi(\R^2 \times [0,2\pi)\times E^-)$ are disjoint since transformations $Ax+b$ in $\C^+$ have $\det(A)>0$ and transformations in $\C^-$ have $\det(A) < 0$.
+
+
+        Furthermore, consider two "symmetric" points $(w,x,y)\in E^+$ and $(w,x,-y)\in E^-$. Then for any $h,k,\theta\in\R^2\times[0,2\pi)$,
+        \begin{align*}
+          \Phi(h,k,\theta,w,x,-y) & = \Translate(h,k)\ \Rotate(\theta)\ \XShear(w)\ \XYScale(x,-y) \\
+                                  & = \Translate(h,k)\ \Rotate(\theta)\ \XShear(w)\ \XYScale(x,y)\ \YScale(-1) \\
+                                  & = \Phi(h,k,\theta,w,x,y)\ \YScale(-1).
+        \end{align*}
+        Therefore we see that $\C^+$ and $\C^-$ are "symmetric" with respect to transformations that differ by a reflection across the $y$-axis.
+
+
+
+        <section id="approximating-an-ifs-fractal-image">Approximating an IFS Fractal Image</section>
+        Now that we have an understanding of what an IFS fractal is and some of its properties, we can discuss methods of generating an image of the fractal. That is, given a Hutchinson operator $F$, what are the computational methods we can use to find the non-empty compact set $S\subset \R^2$ for which $F(S)=S?$
+
+
+        To start, we have the brute-force method of "figure iteration". The contraction mapping principle (Theorem <ref to="contraction-mapping"></ref>) tells us that given any initial compact set $S_0\in \K$, the $n$th iteration of $F$ on $S_0$ (written $F^{(n)}(S_0)$) approaches $S$ as $n$ approaches infinity. Therefore, we have a feasible algorithm:
+
+
+        <ol>
+          <li>Let $S_0$ be some compact subset of $\R^2$.</li>
+          <li>Choose some very large $N\in\N$.</li>
+          <li>For each $n\in\{1,\dots, N\}$, calculate $S_n=F(S_{n-1})=\bigcup_{i=1}^k f_i(S_{n-1})$.</li>
+          <li>Return $S_N$.</li>
+        </ol>
+        <!-- <ol>
+          <li>Start with any compact subset of $\R^2$ (the unit square, perhaps) as the only element in a set: $L=\{S_0\}.$</li>
+          <li>Apply each of the transformations used to build $F$ to each element of $L.$</li>
+          <li>Re-define $L$ to be the set of the resulting subsets.</li>
+          <li>Go to step 2, or stop.</li>
+        </ol> -->
+
+
+        By choosing $N$ large enough, we will have an approximate image of our desired fractal. However, this process is computationally exhausting: suppose the Hutchinson operator is built using $k$ contractions on $\R^2.$ Then $F^{(n)}(S_0)$ is the union of $k^n$ subsets of $\R^2.$ This exponential growth makes this algorithm very memory-inefficient, very quickly. This process is also time-inefficient since $\lim_n\to\infty S_n=S$.
+
+        There is another&mdash;more subtle&mdash;problem with this algorithm. The sequence $(S_n)$ is iteratively defined, so the closer (with respect to the Hausdorff metric) that $S_0$ is to $S$, the faster the sequence will converge to $S$. This arbitrary choice of $S_0$ makes it difficult to choose an effective value of $N$ since we don't know what $S$ is. If we want to make a good choice for $S_0$, we already have to know what $S$ looks like. I suggest calling tasks like this "arbitrarily impossible."
+
+
+        Luckily, there is an algorithm in linear time that is commonly used to generate an approximate image of a IFS fractal, called <em>The Chaos Game</em>. Instead of applying each transformation during every iteration, this algorithm uses a randomly chosen one. We outline the algorithm below.
+
+
+        <!-- <ol>
+          <li>Write $f_1,\dots, f_k:\R^2\to\R^2$ for the contraction mappings that are used to build $F.$</li>
+          <li>Choose some discrete probability distribution (called the "weights") $P=(p_1,\dots, p_k)$, where $\sum P = 1$ and $p_i\in(0,1]$ for each $i\in\{1, \dots, k\}.$</li>
+          <li>Begin defining a sequence $(g_n)$ with $g_0=x_0$, any point in $\R^2$, and let $n=1$.</li>
+          <li>With probability $p_i$, let $f=f_i.$</li>
+          <li>Define $g_{n}=f(g_{n-1})$ and increment $n$.</li>
+          <li>Go to step 4, or stop.</li>
+        </ol> -->
+
+
+        <ol>
+          <li>Define a discrete probability distribution $P=(p_1,\dots, p_k)$, where $\sum_i p_i = 1$ and $p_i\in(0,1]$.</li>
+          <li>Choose some very large $N\in\N$.</li>
+          <li>Choose an arbitrary $g_0\in\R^2$.</li>
+          <li>For each $n\in\{1,\dots, N\}$:
+            <ol>
+              <li>Choose a <b>random</b> $j\in\{1,\dots, k\}$ with probability $p_j$.</li>
+              <li>Calculate $g_n=f_j(g_{n-1})$.</li>
+            </ol>
+          <li>Return $\{g_0,g_1,\dots,g_N\}$.</li>
+        </ol>
+
+
+
+        For sufficiently large $N$, points in $(g_n)$ converge to the fixed point of $F$. Of course, this requires proof.
+        <theorem id="chaos-game">
+          Given any point $x$ in the fixed point of a Hutchinson operator and any $\e > 0$, the probability that any associated chaos game sequence will contain a point that is within $\e$ of $x$ is 1.
+        </theorem>
+        The following is common notation, where $U\subset\R$:
+          $$\diam(U)=\sup\{|x-y|\mid x,y\in U\}.$$
+        In the proof below, only $U\in\K$ are considered ($U$ is closed) so,
+          $$\diam(U)=\max\{|x-y|\mid x,y\in U\}.$$
+        <proof collapse="true" open="false">
+          Let $\e>0$ be given and suppose $F:\K\to\K$ is a Hutchinson operator defined using contraction mappings $f_1,\dots,f_k:\R^2\to\R^2$ with contraction constants $c_1,\dots, c_k.$ Write $S$ for the unique fixed point of $F.$ Choose any point $r\in\R^2$, and any $x\in S.$ Also, let $P=(p_1,\dots,p_k)$ be any discrete probability distribution with each $p_i>0$ and $\sum_{i=1}^kp_i=1.$ Write $(g_n)$ for any sequence of points generated by the chaos game using $F$ and $P$, based at $r.$ That is, let $(t_n)$ be an infinite sequence of randomly distributed (according to $P$) integers from the set $\N_k = \{1,\dots,k\}$, and
+          $$(g_n)=((f_{t_n}\circ\dots\circ f_{t_{1}})(r) \mid n\in\N).$$
+          We will show that we can find some $N\in\N$ for which $|g_N - x| < \e.$
+
+
+          Choose any point $x_0\in S$ and consider the sequence
+          $$(h_n)=((f_{t_n}\circ\dots\circ f_{t_{1}})(x_0) \mid n\in\N).$$
+          Since $x_0$ is a member of the fixed set $S$, every term of $(h_n)$ is also in $S$, and since each $f_i$ is a contraction mapping,
+          $$|g_{n+1}-h_{n+1}| \leq c_{t_n+1}|g_n-h_n| < |g_n - h_n|.$$
+          Therefore, we can choose $N_1\in\N$ large enough so that $$|g_n-h_n| < \frac{\e}{2}$$
+          for all $n\in\N$ with $n\geq N_1.$ Now recognize that
+          $$S = F(S) = f_1(S)\cup \dots \cup f_k(S),$$
+          so there must be some $s_1\in\N_k$ for which $x\in f_{s_1}(S).$ Similarly,
+          \begin{align*}
+            f_{s_1}(S) & = f_{s_1}(f_1(S)\cup \dots \cup f_k(S)) \\
+                       & = f_{s_1}(f_1(S))\cup \dots \cup f_{s_1}(f_k(S)),
+          \end{align*}
+          so there is some $s_2\in\N_k$ for which $x\in f_{s_1}(f_{s_2}(S)).$ Continue this process, defining an infinite sequence $(s_n)$. Then use this sequence to build another:
+          $$(A_n) = ((f_{s_1}\circ \dots \circ f_{s_n})(S)\mid n\in\N).$$
+          Clearly, for any $n\in\N$, $x\in A_n$, and since each $f_i$ is a contraction mapping with contraction constant $c_i$,
+          $$\diam(A_{n+1})\leq c_i\diam(A_n)<\diam(A_n).$$
+          In particular, we can choose $m\in\N$ large enough so that $\diam(A_{m})<\frac{\e}{2}.$
+
+
+          Since the sequence $(t_n)$ is random, there is a probability of 1 (by the infinite monkey Theorem proven in <cite to="monkey"></cite>) that the fininte sequence $s_{m}, \dots, s_{1}$ eventually appears as a continuous subseqence of $(t_n)$ after the $N_1$st term. That is, there is some $N\in\N$ with $N > N_1$, for which
+          $$t_{N - \ell + 1} = s_{1 + \ell - 1}$$
+          for all $\ell\in\{1,\dots, m\}.$ Then we know that $h_{N-m}\in S$ (if $N=m$, we can write $h_0=x_0\in S$), so
+          \begin{align*}
+            h_{N} & = (f_{t_N}\circ\dots\circ f_{t_1})(x_0) \\
+                  & = (f_{s_1}\circ\dots\circ f_{s_m}\circ f_{t_{N-m}}\circ\dots\circ f_{t_1})(x_0) \\
+                  & = (f_{s_1}\circ\dots\circ f_{s_m})(h_{N-m}) \\
+                  & \in A_m.
+          \end{align*}
+          Therefore,
+          $$|g_N - x| \leq |g_N - h_N| + |h_N - x| < \e.$$
+        </proof>
+
+        It is important to note in the proof above, $|g_n-h_n|<\frac\e2$ for all $n\in\N$ with $n\geq N_1$, but we only found a <em>specific</em> $N>N_1$ for which $|g_N-x| < \e.$ This leaves the question: are the points in $(g_n)$ just dense everywhere (which would be uninteresting), or do they stay close to $S$? The answer is the latter, since $(h_n)\subset S$, and for $n\geq N_1$, $(g_n)$ and $(h_n)$ stay arbitrarily close.
+
+        The proof also explains intuitively that the more contraction mappings that are used to defined a Hutchinson Operator, the longer the chaos game might take to converge: the more transformations used, the longer the sequence $(s_n)$ might be, the larger $N$ must be.
+
+        The role of the weights is purely aesthetic: in infinitum, any weight distribution will result in the same fractal image, but computationally restricted to a finite number of iterations, choosing certain $f_i$ to use more or less frequently than others allows the points in the approximated image to be more evenly distributed. It is currently an open problem to determine the "best" way to choose $P$, but <cite to="fractals-for-the-classroom"></cite> suggests defining
+        $$p_i=\frac{\max(\delta, |\det A_i|)}{\sum_{j=1}^k\max(\delta, |\det A_j|)},$$
+        where $\delta$ is some small positive number, and $A_i$ is the real $2\times 2$ matrix associated with contraction mapping $f_i$. This formula makes intuitive sense, since $|\det A_i|$ is the area of the the image of the unit square under $f_i$. In the <a href="/playground" class="highlight">playground</a>, we use $\delta = 0.01$ for our "Auto Distribute Weights" feature in order to account for noninvertible transformations whose associated matrices have determinant 0.
+
+
+
+
+        <section>Dimension</section>
+
+        Now we will return to Mandelbrot's definition of fractals, and square it with our work on iterated function systems. It should be noted that Mandelbrot himself was not satisfied with his own definition, since it excludes some notable "fractal-like" sets, like the <a href="/playground/5c07cb5f98075" class="highlight" target="_blank">Devil's Staircase</a>, which has Hausdorf-Besicovitch and Lesbesgue Covering dimension equal to 1.
+
+        To start, we develop some theory of different formulations for dimension, and then restrict ourselves to sets in $\R^2$. Until otherwise specified, we are operating in a general metric space $X$ with metric $d_X$, and $S$ is a subset of $X$.
+
+        The two types of dimension that we will discuss are topological dimensions (which are topological invariants), and fractal dimensions (which are not necessarily invariant under homeomorphisms). These two sets of dimension definitions hold interesting members, and we will explore the important ones, primarily Hausdorf-Besicovitch, and Lesbesgue Covering dimension, which Mandelbrot uses in his definition. The later is always an integer, while the former is often not. It might be tempting to declare fractals to only be those set with non-integer Lesbegue Covering dimension, but there are examples of fractals that have integer (but different!) Hausdorff-Besicovitch and Lesbegue Covering dimensions (see <cite to="mandelbrot"></cite>).
+
+        A history of the two categories of dimension can be helpful; a more detailed version is given in <cite to="mandelbrot"></cite>.
+
+        <subsection>Formulations of Topological Dimension</subsection>
+
+        Among the notable figures that appear in the story of the creation of topological dimension are Euclid, Reimann, Cantor, Peano, Hermite, Poincaré, Brouwer, Menger, Urysohn, and Lesbegue. Before Cantor and Peano's work on mappings between lines and surfaces, the subject of dimension recieved little attention, although many pointed out that the concept was not well enough understood. Hermite detested Cantor's work, calling it "vertibale torure" and was surprised that Poincaré took interest in it. These mappings showed that dimension was not a simple as commonly accepted definition, "the minimum number of continuous real parameters needed to describe a space." Poincaré suggested an intuitive and pragmatic approach. Brouwer formalized Poincaré's work in 1913, and in 1922 Menger and Urysohn independently (without knowledge of Brouwer or each other) recreated and improved upon Brouwer's work; their "Inductive" dimension remains to be widely used today.
+
+
+        <definition title="Small Inductive (Menger-Urysohn) dimension <cite to='engelking'></cite>">
+          Suppose $S$ is regular. We define the small inductive dimension $\dim_\text{ind}$, which is an integer larger than or equal to $-1$, or infinity ($\infty$).
+          <ul>
+            <li>$\dim_\text{ind}(S)=-1$ if and only if $S=\emptyset$.</li>
+            <li>$\dim_\text{ind}(S)\leq n$, where $n\in\{0, 1, 2, \dots\}$, if for every point $x\in S$ and each neighborhood $V \subset S$ of the point $x$ there exists an open set $U \subset S$  such that $x\in U\subset V$ and $\dim_\text{ind}(\partial U)\leq n - 1$.</li>
+            <li>$\dim_\text{ind}(S)=n$ if $\dim_\text{ind}(S)\leq n$ and $\dim_\text{ind}(S)>n-1$, i.e., the inequality $\dim_\text{ind}(S)\leq n-1$ does not hold.</li>
+            <li>$\dim_\text{ind}(S)=\infty$ if $\dim_\text{ind}(S)>n$ for all $n\in\{-1,0,1\dots\}$.</li>
+          </ul>
+        </definition>
+
+        <definition title="Large Inductive (Brouwer-Čech) dimension <cite to='engelking'></cite>">
+          Suppose $S$ is $S$ is normal. We define the large inductive dimension $\dim_\text{Ind}$, which is an integer larger than or equal to $-1$, or infinity ($\infty$).
+          <ul>
+            <li>$\dim_\text{Ind}(S)=-1$ if and only if $S=\emptyset$.</li>
+            <li>$\dim_\text{Ind}(S)\leq n$, where $n\in\{0, 1, 2, \dots\}$, if for every closed set $A\subset S$ and each open set $V\subset S$ which contains the set $A$ there exists an open set $U\subset X$ such that $A\subset U\subset V$ and $\dim_\text{Ind}(\partial U)\leq n - 1$.</li>
+            <li>$\dim_\text{Ind}(S)=n$ if $\dim_\text{Ind}(S)\leq n$ and $\dim_\text{Ind}(S)>n-1$.</li>
+            <li>$\dim_\text{ind}(S)=\infty$ if $\dim_\text{Ind}(S)>n$ for all $n\in\{-1,0,1\dots\}$.</li>
+          </ul>
+        </definition>
+
+        We record two separable from <cite to="engelking"></cite>. If $S$ is normal, then $\dim_\text{ind}(S)\leq \dim_\text{Ind}(S)$. If $S$ is seperable and metric, then $\dim_\text{Ind}(S)=\dim_\text{ind}(S)$.
+
+
+        Equivalent to $\dim_\text{ind}(S)\leq n$ is the existence of a basis of $S$ whose elements have boundaries with dimension at most $n-1$ (from <cite to="dimension-theory"></cite>).
+
+        Cantor and Peano's work motivated a search for a proof that Euclidean $n_0$-space and $n_1$-space are homeomorphic if and only if $n_0=n_1$. J. Luroth settled the case of $n_0\leq 3$ and $n_1>n_0$ in 1906, but the proof did not include any simple property of the spaces that would guarantee the non-existence of a homeomorphism between them. Brouwer's proof in 1911, which introduced a topologically-invariant and integer-valued function on topological spaces, did just that, and was therefore more impactful. Lesbegue had a different approach to define a dimension function that would be topologically invariant, and gave a conjecture on how it can be used to distinguish Euclidean spaces; Brouwer proved the conjecture in 1913. We will see that Lesbegue's idea is useful.
+
+
+
+        <definition title="The order of a cover <cite to='engelking'></cite>">
+          Let $S$ be a set and let $C$ be a cover of $S$. The <em>order</em> of $C$ is the largest integer $n$ such that the family $C$ contains $n+1$ sets with a non-empty intersection; if no such integer exists, we say that the family $C$ has order $\infty$.
+        </definition>
+        We'll decide to understand that the "maximum" of an unbounded subset of $\N$ is $\infty$. Notationally, if we write $M_C(p)$ for the cardinality of the set $\{U\in C\mid p\in U\}$, then
+        \begin{align*}
+          \Ord_S(C) & = \max \{n \in \N \mid \exists U_1,\dots, U_{n+1}\in C, \bigcap U_i \neq \emptyset\} \\
+                    & = \max \{n \in \N \mid \exists p\in S, M_C(p) > n\} \\
+                    & = \max \{M_C(p) \mid p\in S\} - 1.
+        \end{align*}
+
+        <definition title="A refinement of a cover <cite to='engelking'></cite>">
+          If $C$ is a cover of $S$, then a <em>refinement</em> of $C$ is an open cover $D$ of $S$ so that every element of $D$ is a subset of an element of $C$.
+        </definition>
+
+        We let $\Ref_S(C)$ be the set of refinements of $C$, and write $\O(S)$ for the set of open covers of $S$.
+
+        <definition title="Čech-Lesbegue Covering Dimension <cite to='engelking'></cite>">
+          Suppose $S$ is normal. We define the large inductive dimension $\dim_\text{Ind}$, which is an integer larger than or equal to $-1$, or infinity ($\infty$).
+          <ul>
+            <li>$\dim_{LCD}(S)\leq n$, where $n\in\{-1,0,1,\dots\}$, if for every finite open cover of the space $S$ has a finite open refinement of order at most $n$.</li>
+            <li>$\dim_\text{LCD}(S)=n$ if $\dim_\text{LCD}(S)\leq n$ and $\dim_\text{LCD}(S)>n-1$.</li>
+            <li>$\dim_\text{LCD}(S)=\infty$ if $\dim_\text{LCD}(S)>n$ for all $n\in\{-1,0,1,\dots\}$.</li>
+          </ul>
+        </definition>
+
+        In other words, the Lesbegue Covering dimension of $S$ is $n$ if and only if
+        <ol>
+          <li>every finite open cover of $S$ has a refinement with order $n$ or less, and</li>
+          <li>there is some open cover with no refinement of order $n - 1$ or less;
+            <ul><li>sufficiently, there is no open cover of order $n - 1$ or less.</li></ul>
+          </li>
+        </ol>
+
+
+        <subsection>Formulations of Fractal Dimension</subsection>
+
+        Russell mentions fractional dimension in an 1897 footnote while referencing Delboeuf, but nothing more has been uncovered in Delbeouf's work. The history of Fractal dimension comes mostly just from Hausdorff.
+
+        While the concepts of topological dimension are <em>topological</em> in nature, the concepts of Fractal dimension are <em>metric</em> in nature.
+
+
+        <definition title="$q$-dimensional Measure <cite to='dimension-theory'></cite>">
+          For $q\geq 0$, the <em>$q$-dimensional measure</em> of $S$ is
+          $$m_q(S)=\sup\{m^\e_q(S)\mid \e>0\},$$
+          where
+          $$m_q^\e(S) = \inf\left\{\sum_{i=1}^\infty \diam(A_i)^q\mid C=\{A_1,\dots\}\subseteq P(S), \bigcup C = S, \forall A_i\in C, \diam(A_i)<\e\right\}$$
+        </definition>
+
+
+        <definition title="Hausdorff Dimension <cite to='dimension-theory'></cite>">
+          The <em>Hausdorff dimension</em> of $S$ is defined by
+          $$\dim_\text{Haus}=\sup\{q\in\R \mid m_q(S)>0\}.$$
+        </definition>
+
+
+        Related dimensions makes some calculations easier.
+
+        <definition title="Self Similarity Dimension <cite to='hutchinson'></cite>,<cite to='hausdorff-paper'></cite>">
+          If $S\subset \R^n$ can be divided into some finite number $k$ of subsets, all congruent (by translations or rotations) to one another and each a rescaled copy of $S$ by a linear factor $r_i < 1$, then the <em>self-similarity</em> dimension of $S$ is the unique number $D$ for which
+          $$\sum_{i=1}^k r_i^D=1.$$
+          We denote the similarity dimension of $S$ as $\dim_\text{sim}(S)$.
+          <!-- $$\dim_\text{sim}(S) = \frac{\log(k)}{\log(1/r)}.$$ -->
+        </definition>
+
+        Note that if $r_1=\dots=r_k=r$, then $kr^D=1$, so we can solve for $D$:
+        $$\dim_\text{sim}(S)=D=\log_r(1/k)=\frac{\log(k)}{\log(1/r)}.$$
+        This last form can serve as a motivation for the following dimension.
+
+        Let $N_\e(S)$ be the minimum number of open balls of diameter $\e$ needed to cover $S$. Alternatively, suppose we partition $\R^n$ with a grid of boxes with side length $\e$ and define $N_\e(S)$ to be the number of boxes that intersect $S$ (from <cite to='hausdorff-paper'></cite>).
+
+        <definition title="Minkowski (Box-Counting) Dimension <cite to='stonybrook'></cite>">
+          Define the <em>upper Minkowski dimension</em> as
+          $$\overline{\dim}_{\text{box}}(S)=\limsup_{\e \rightarrow 0} \frac{\log (N_\e(S))}{\log(1 / \e)},$$
+          and the <em>lower Minkowski dimension</em>
+          $$\underline{\dim}_{\text{box}}(S)=\liminf_{\e \rightarrow 0} \frac{\log (N_\e(S))}{\log(1 / \e)}.$$
+          If the two values agree, the common value is simply called the <em>Minkowski dimension</em> of $S$ and denoted by $\dim_\text{box}(S)$.
+        </definition>
+
+        The <em>packing dimension</em> is also closely related to the box counting dimension; it can be defined in terms of the upper Minkowski dimension. See <cite to="stonybrook"></cite> for details.
+
+
+        <subsection>Connections Between Dimensions</subsection>
+
+        Many different formulations of dimension are computationally convenient: some are easier to compute in certain cases. If our goal is to show that a set is a fractal by demonstrating that its Hausdorff dimension is greater than its topological dimension, it is sufficient to find a number strictly between the two. In other cases, certain dimensions coincide and are just easier to compute.
+
+        We have the following relation between Hausdorff and box-counting dimension from <cite to="stonybrook"></cite>:
+        $$\dim_\text{Haus}\leq \underline{\dim}_\text{box}\leq \overline{\dim}_\text{box}.$$
+        This inequality can be strict: the set $S=\{0,1,\frac12,\frac13,\frac14,\dots\}$ has box-counting dimension $\frac12$ but any countable set has Hausdorff dimension 0.
+
+        The relationship between Hasudorff and Inductive dimension is given in <cite to="dimension-theory"></cite>. If $S$ is non-empty, then $\dim_\text{Haus}(S) \geq \dim_\text{ind}(S)$. Moreover,
+        $$\inf_{R\cong S} \dim_\text{Haus}(R) = \dim_\text{ind}(S).$$
+
+
+
+        Authors in <cite to="engelking"></cite> give us the following various ways to relate inductive and Lesbegue covering dimension. If $S$ is normal, then $\dim_\text{LCD}(S)=0$ and $\dim_\text{Ind}(S)=0$ are equivalent. If $S$ is a compact metric space, then $$\dim_\text{ind}(S) \leq \dim_\text{LCD}(S)$$. If $S$ is separable metric space, then $$\dim_\text{LCD}(S) = \dim_\text{ind}(S) = \dim_\text{Ind}(S).$$
+        <!-- <span style="color: red">Find source for when inequality can be strict.</span>
+
+        <span style="color: red"> When $S$ is normal with a countable base,
+        $$\dim_\text{LCD}(S)=\dim_\text{Ind}(S)=\dim_\text{ind}(S).$$ The Nöbeling–Pontryagin theorem then states that such spaces with finite dimension are characterised up to homeomorphism as the subspaces of the Euclidean spaces.</span> -->
+
+        Perhaps, however, the most important connection is between Hausdorff dimension and self similarity dimension. In order to understand this connection we need to understand the following condition.
+
+        <definition title="Open Set Condition <cite to='hutchinson'></cite>">
+          Given a Hutchinson operator $F:\K\to\K$ defined on contractions $f_1,\dots f_k:\R^2\to\R^2$, a set $S\subseteq\R^n$ satisfies the <em>open set condition</em> if there exists a non-empty open set $U$ such that
+          <ol>
+            <li>$F(U)\subseteq U$, and</li>
+            <li>$f_i(U)\cap f_j(U)=\emptyset$ if $i\neq j$.</li>
+          </ol>
+        </definition>
+
+        It is proven in <cite to='hutchinson'></cite> that if a set satisfies the open set condition, then $S$ is self similar and $$\dim_\text{haus}(S)=\dim_\text{sim}(S).$$
+        Intuitively, the open set condition is to ensure that the self similar pieces of the IFS "don't overlap too much." On the <a href="/playground" class="highlight">playground</a> page, to show that a fixed point set satisfies the open set condition, it is sufficient to ensure that the squares in the "Generator" image do not overlap (other than edges), and that every colored square is contained within the outline of the unit square.
+
+        In our case of linear IFS, we consider $X=\R^2$, which is a separable metric space. Since the fixed points $S$ of our Hutchinson operators are non-empty, we have
+        $$\dim_\text{Haus}(S) \geq \dim_\text{ind}(S) = \dim_\text{LCD}(S).$$
+
+
+        <section>Conclusion</section>
+
+        Finally we have a fuller understanding of affine linear iterated function systems and the images that they can produce. However, we still have one more loose end to tie up: do our IFS fractals satisfy Mandelbrot's definition of fractal? Unfortunately, the answer is no. Using Hutchinson operators, we can get an IFS fixed point that is <a class="highlight" href="https://ifs-fractals.herokuapp.com/playground/5c26c3a967b90">single point</a>, <a class="highlight" href="https://ifs-fractals.herokuapp.com/playground/5c262ff9596da">line segment</a>, and <a class="highlight" href="https://ifs-fractals.herokuapp.com/playground/5c26301172ecc">solid square</a>, which are not fractals, since they have a Hausdorff <b>and</b> Topological dimension of 0, 1, and 2, respectively.
+
+        However, we can produce actual fractals if we use more interesting transformations than those used in the point, line, and square examples above. For instance, the <a href="/playground/vonkoch">Koch curve</a> can be made using an IFS with four transformations. The Koch curve is self-similar and has similarity dimension $\log_4(3)$, which is strictly greater than its topological dimension of 1.
+
+
+        <hr>
+        <references>
+          <item id="keir">Keir H. Lockridge, Personal Communication, 2020-1.</item>
+          <item id="BBK">Benjamin B. Kennedy, <em>Introduction to Real Analysis</em>, Gettysburg College 2018.</item>
+          <item id="fractals-for-the-classroom">Evan Maletsky, Terry Perciante, and Lee Yunker, <em>Fractals for the Classroom, Part 1: Introduction to Fractals and Chaos</em>, 1992.</item>
+          <item id="monkey">Richard E. Isaac, <em>The Pleasures of Probability</em>, Springer 1995.</item>
+          <item id="engelking">Ryszard Engelking, <em>Dimension Theorey</em>, North-Holland Publishing Company, 1978.</item>
+          <item id="dimension-theory">Witold Hurewicz and Henry Wallman. <em>Dimension Theory.</em> 1941.</item>
+          <item id="mandelbrot">Benoit Mandelbrot. <em>The Fractal Geometry of Nature.</em> W. H. Freeman and Company, New York, 1977.</item>
+          <item id="hausdorff-paper">Dierk Schleicher. <em>Hausdorff Dmension, Its Properties, and Its Surprises</em>. The Mathematical Association of America (Monthly 114), 2007. <a class="highlight" href="http://hiperc.buffalostate.edu/MSMTprogram/uploads/MSMT/Hausdorff-Dim.pdf">http://hiperc.buffalostate.edu/MSMTprogram/uploads/MSMT/Hausdorff-Dim.pdf</a></item>
+          <item id="stonybrook">Christopher J. Bishop and Yuval Peres. <em>Fractals in Probability and Analysis</em>. Stony Brook University and Microsoft Research. <a class="highlight" href="https://www.math.stonybrook.edu/~bishop/classes/math324.F15/book1Dec15.pdf">https://www.math.stonybrook.edu/~bishop/classes/math324.F15/book1Dec15.pdf</a></item>
+          <item id="hutchinson">John E. Hutchinson. <em>Fractals and Self Similarity</em>. Indiana University Mathematics Journal, Vol. 30, No. 5, 1981.</item>
+        </references>
+      </div>
+    </div>
+  </div>
+
+
+  </body>
+
+  <script type="text/x-mathjax-config">
+    new HTMLTeX(document.getElementById('LaTeX'), MathJax).render({
+      'highlight_links':true
+    });
+  </script>
+</html>

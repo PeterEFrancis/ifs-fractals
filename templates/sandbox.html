@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>IFS Fractals : Sandbox</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="shortcut icon" href="/static/img/leaf.gif" type="image/gif">
+
+  <!-- redirect to mobile -->
+  <script language="javascript">
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+      if (confirm("Your device might not be suitable for the fractal playground.\n\nClick 'Cancel' to continue, and 'OK' to return to IFS-Fractal home.")) {
+        window.location.href = '/';
+      }
+    }
+  </script>
+
+
+  <!-- fontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <!-- MathJax -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']]
+      }
+    });
+  </script>
+
+
+  <html>
+  <head>
+    
+  <style>
+
+    canvas {
+      border: 1px solid black;
+      width: 100%;
+    }
+
+
+    body {
+      min-width: 600px;
+    }
+
+    .navbar {
+      border-radius: 0;
+    }
+
+
+  </style>
+
+  <!-- MathJs -->
+  <script src="/static/js/math.js"></script>
+
+
+  
+
+  <!-- auxilliary -->
+  <script src="/static/js/transformations.js"></script>
+  <script src="/static/js/letter_transformations.js"></script>
+  <script src="/static/js/factor_transformation.js"></script>
+  <script src="/static/js/helper.js"></script>
+  <script src="/static/js/example_fractal_info.js"></script>
+
+<!-- Classes -->
+  <script src="/static/js/Cartesian.js"></script>
+  <script src="/static/js/Fractal.js"></script>
+  <script src="/static/js/MovableGeneratorPane.js"></script>
+
+
+  <link rel="stylesheet" href="/static/css/Cartesian.css">
+
+
+  </head>
+  <body>
+
+    {{ navbar | safe }}
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-6">
+          <canvas id="generator-canvas" width="1000" height="1000"></canvas>
+        </div>
+        <div class="col-md-6">
+          <canvas id="cartesian-canvas" width="1000" height="1000"></canvas>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 20px;">
+        <div class="col-md-6">
+          <h3>Generator Controls</h3>
+          <ul>
+            <li>Click and drag to pan</li>
+            <li>Scroll to zoom</li>
+            <li>Click and drag on a block to move it</li>
+            <li>Double click on a block to delete it</li>
+            <li>Double click on empty space to create a new block</li>
+            <li>Click and drag on the main (Adjacent to L) corners of a block to warp it</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <div class="btn-group">
+            <button class="btn btn-default btn" onclick="autocenter();" style="width:calc(100% - 35px)">Auto Center</button>
+            <button id="auto-center-lock" class="btn btn-success" onclick="toggle_auto_center_lock();" style="width:35px;">
+              <i class="fa fa-lock" id="auto-center-lock-icon"></i>
+            </button>
+          </div>
+          <button class="btn btn-default" onclick="export_to_playground()">Open in Playground</button>
+          <div class="input-group" style="margin-top: 20px;">
+            <span class="input-group-addon">Points to Plot</span>
+            <input id="points" type="text" class="form-control" value="50000"/>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </body>
+
+
+  <script>
+
+    var cartesian_canvas = document.getElementById('cartesian-canvas');
+    var cart = new Cartesian(cartesian_canvas);
+    var fractal = new Fractal(cart, get_word_tw("Fractal"));
+
+    var generator_canvas = document.getElementById('generator-canvas');
+    generator_canvas.width = 1000;
+    generator_canvas.height = 1000;
+
+    var move_gen = new MovableGeneratorPane(generator_canvas);
+
+
+
+
+    function update() {
+      try {
+        let tw = move_gen.get_TW();
+        fractal.set_TW(tw);
+        fractal.set_max_number_of_points(document.getElementById('points').value);
+        fractal.plot();
+        fractal.cartesian.draw_origin();
+        if (auto_center_lock) {
+          autocenter();
+        }
+      } catch (e) {
+        fractal.error(e);
+      }
+    }
+
+    setInterval(function() {
+      update();
+    }, 100);
+
+
+    var auto_center_lock = true;
+
+    function set_auto_center_lock(val) {
+      auto_center_lock = val;
+      if (auto_center_lock) {
+        autocenter();
+        document.getElementById('auto-center-lock').classList.add("btn-success");
+        document.getElementById('auto-center-lock-icon').classList.add("fa-lock");
+        document.getElementById('auto-center-lock-icon').classList.remove("fa-unlock");
+      } else {
+        document.getElementById('auto-center-lock-icon').classList.remove("fa-lock");
+        document.getElementById('auto-center-lock-icon').classList.add("fa-unlock");
+        document.getElementById('auto-center-lock').classList.remove("btn-success");
+      }
+    }
+
+    function toggle_auto_center_lock() {
+      set_auto_center_lock(!auto_center_lock);
+    }
+
+    function autocenter() {
+      var curr = auto_center_lock;
+      auto_center_lock = true;
+      auto_center_lock = curr;
+      cart.set_with_bounds(fractal.get_bounds(), 0.9);
+    }
+
+    function export_to_playground() {
+
+      let transformations = move_gen.get_matrices().map(x => "M(" + x[0][0] + "," + x[0][1] + "," + x[1][0] + "," + x[1][1] + "," + x[0][2] + "," + x[1][2] + ")").join("&");
+      let weights = fractal.tw.weights.join(",")
+      window.open("/playground/t=" + transformations + "/w=" + weights);
+    }
+
+   
+
+  </script>
+
+
+
+</html>
